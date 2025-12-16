@@ -5,8 +5,14 @@ export interface Set {
   /** Unique identifier for this set (UUID format) */
   id: string
 
+  /** Explicit ordering within the exercise */
+  orderIndex: number
+
   /** Type of set: warmup or work set */
   type: 'warmup' | 'work'
+
+  /** Whether this set is enabled (warmups default to false) */
+  enabled: boolean
 
   /** Target weight for this set */
   targetWeight: number
@@ -17,13 +23,17 @@ export interface Set {
   /** Actual weight lifted (for editing past workouts) */
   actualWeight?: number
 
-  /** Actual number of repetitions completed (for editing past workouts) */
+  /** Actual number of repetitions completed (0 if failed) */
   actualReps?: number
 
-  /** Whether this set has been completed */
-  completed: boolean
+  /**
+   * Status of the set:
+   * - pending: not attempted yet
+   * - completed: successfully completed
+   * - failed: attempted but did not meet target (actualReps = 0)
+   */
+  status: 'pending' | 'completed' | 'failed'
 
-  /** Optional rest time in seconds for this set (for rest timer) */
-  restSeconds?: number
+  /** Elapsed rest time after this set (seconds, stopwatch-based) */
+  restElapsedSeconds?: number
 }
-

@@ -18,7 +18,9 @@ export interface ExerciseDefinition {
   /** Optional default rest time in seconds between sets */
   defaultRestSeconds?: number
 
-  /** Date when this exercise definition was created */
-  createdDate: Date
-}
+  /** UTC timestamp (ms since epoch) when this definition was created */
+  createdAtMs: number
 
+  /** Whether this exercise is archived (hidden from new workouts but kept for history) */
+  archived: boolean
+}

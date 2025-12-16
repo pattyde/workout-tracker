@@ -7,8 +7,8 @@ export interface Workout {
   /** Unique identifier for this workout (UUID format) */
   id: string
 
-  /** Date when this workout was performed or scheduled */
-  date: Date
+  /** UTC timestamp (ms since epoch) when this workout occurred */
+  dateMs: number
 
   /** Array of exercise instances performed in this workout */
   exerciseInstances: ExerciseInstance[]
@@ -19,4 +19,3 @@ export interface Workout {
   /** Whether this workout has been completed */
   completed: boolean
 }
-

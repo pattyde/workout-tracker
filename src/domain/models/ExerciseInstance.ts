@@ -14,10 +14,24 @@ export interface ExerciseInstance {
   /** Reference to the Workout that contains this exercise instance */
   workoutId: string
 
+  /** Explicit ordering within the workout */
+  orderIndex: number
+
   /** Array of sets for this exercise, ordered with warmups first, then work sets */
   sets: Set[]
+
+  /** Selected bar type for this exercise (persists across workouts) */
+  barTypeId: string
+
+  /** Whether shared-bar plate loading mode is enabled for this exercise */
+  useSharedBarLoading: boolean
+
+  /** Optional timestamp when this exercise was started (ms since epoch) */
+  startedAtMs?: number
+
+  /** Optional timestamp when this exercise was completed (ms since epoch) */
+  completedAtMs?: number
 
   /** Optional notes specific to this exercise instance */
   notes?: string
 }
-

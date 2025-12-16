@@ -9,19 +9,28 @@ export interface ProgressionState {
   /** Reference to the ExerciseDefinition this progression state belongs to */
   exerciseDefinitionId: string
 
-  /** Current weight being used for this exercise */
+  /** Current work weight being used for this exercise */
   currentWeight: number
 
-  /** Number of consecutive workout failures (increments on workout failure, resets on success) */
+  /** Previous weight before last progression or deload */
+  previousWeight?: number
+
+  /**
+   * Number of consecutive workout failures
+   * - increments on failed workout
+   * - resets to 0 on success
+   */
   failureStreak: number
 
-  /** Optional date of the last workout for this exercise */
+  /** Date of the most recent workout for this exercise */
   lastWorkoutDate?: Date
 
-  /** Weight increment used for progression (e.g., 2.5 for kg, 5 for lb) */
+  /** Date when a deload was last applied */
+  lastDeloadDate?: Date
+
+  /** Weight increment used for progression (e.g., 2.5kg, 5lb) */
   plateIncrement: number
 
   /** Unit of measurement for this exercise */
   unit: 'kg' | 'lb'
 }
-

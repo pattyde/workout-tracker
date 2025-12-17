@@ -18,25 +18,6 @@ export interface PlateCalculatorConfig {
   /** Rounding increment for target weights (e.g., 0.5kg or 1lb) */
   roundingIncrement: number
 
-  /**
-   * Calculation mode:
-   * - 'single': one lifter
-   * - 'shared': shared bar between two lifters
-   */
-  mode: 'single' | 'shared'
-
-  /**
-   * Companion lifter's work weight (used only in shared mode).
-   * Lifter A is assumed to be the app user.
-   */
-  sharedLifterWeight?: number
-
-  /**
-   * Whether to optimise plate selection to minimise plate changes
-   * between lifters in shared mode.
-   */
-  optimizeForMinimalPlateChanges: boolean
-
   /** Unit of measurement */
   unit: 'kg' | 'lb'
 }

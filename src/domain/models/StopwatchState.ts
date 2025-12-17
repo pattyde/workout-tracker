@@ -1,31 +1,20 @@
 /**
- * StopwatchState represents the state of a count-up stopwatch timer.
+ * StopwatchState represents a count-up stopwatch.
+ * It is time-based, not tick-based.
  */
 export interface StopwatchState {
-  /** Unique identifier for this stopwatch */
-  id: string
-
-  /** Associated workout (if any) */
-  workoutId?: string
-
-  /** Associated exercise instance (if any) */
-  exerciseInstanceId?: string
-
-  /** Timestamp when the stopwatch was started (null if stopped) */
+  /** When the stopwatch was started (epoch ms), or null if not running */
   startTime: number | null
 
-  /** Accumulated elapsed time in seconds when paused */
-  pausedTime: number
+  /** Accumulated elapsed time in milliseconds when paused */
+  accumulatedMs: number
 
-  /** Alert intervals in seconds (e.g., [90, 180, 300]) */
-  alertIntervals: number[]
+  /** Alert thresholds in seconds (e.g. [90, 180, 300]) */
+  alertThresholdsSec: number[]
 
-  /** Alert intervals that have already fired */
-  firedAlertSeconds: number[]
+  /** Thresholds that have already fired */
+  firedThresholdsSec: number[]
 
-  /** Whether the user has dismissed the stopwatch */
+  /** Whether the stopwatch has been dismissed */
   dismissed: boolean
-
-  /** Whether the stopwatch is currently running */
-  isRunning: boolean
 }

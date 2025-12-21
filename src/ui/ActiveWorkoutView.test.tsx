@@ -49,6 +49,7 @@ describe('ActiveWorkoutView', () => {
       <ActiveWorkoutView
         workout={WORKOUT}
         exerciseDefinitions={DEFINITIONS}
+        onSetTap={() => {}}
       />
     )
 

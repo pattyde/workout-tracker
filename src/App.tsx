@@ -10,6 +10,7 @@ import {
 } from './domain/programs/stronglifts5x5Seed'
 import { startOrResumeWorkout } from './services/startOrResumeWorkoutService'
 import ActiveWorkoutView from './ui/ActiveWorkoutView'
+import { applySetTapToWorkout } from './services/setTapService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -119,6 +120,15 @@ function AppBootstrap() {
     <ActiveWorkoutView
       workout={workout}
       exerciseDefinitions={exerciseDefinitions}
+      onSetTap={async setId => {
+        if (!workout) return
+        const updated = await applySetTapToWorkout(
+          workout,
+          setId,
+          workoutRepository
+        )
+        setWorkout(updated)
+      }}
     />
   )
 }

@@ -59,6 +59,7 @@ function makeWorkout(sets: Set[]): Workout {
         useSharedBarLoading: false,
       },
     ],
+    variation: 'A',
     completed: false,
   }
 }

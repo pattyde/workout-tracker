@@ -30,6 +30,7 @@ async function getOrInitAppState(
 
 export async function startWorkout(
   exerciseInstances: ExerciseInstance[],
+  variation: Workout['variation'],
   nowMs: number,
   workoutRepository: WorkoutRepository,
   appStateRepository: AppStateRepository
@@ -63,6 +64,7 @@ export async function startWorkout(
     id: workoutId,
     dateMs: nowMs,
     exerciseInstances: exerciseInstancesWithId,
+    variation,
     startedAtMs: nowMs,
     completedAtMs: undefined,
     completed: false,

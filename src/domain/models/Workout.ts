@@ -13,6 +13,9 @@ export interface Workout {
   /** Array of exercise instances performed in this workout */
   exerciseInstances: ExerciseInstance[]
 
+  /** Workout variation for program rotation */
+  variation: 'A' | 'B'
+
   /** Timestamp when this workout session was started (ms since epoch) */
   startedAtMs?: number
 

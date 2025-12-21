@@ -75,6 +75,7 @@ describe('WorkoutLifecycleService', () => {
 
     const workout = await startWorkout(
       makeExerciseInstances(),
+      'A',
       1000,
       workoutRepo,
       appStateRepo
@@ -96,6 +97,7 @@ describe('WorkoutLifecycleService', () => {
       id: 'w-2',
       dateMs: 1000,
       exerciseInstances: [],
+      variation: 'A',
       startedAtMs: 1000,
       completed: false,
     }
@@ -123,12 +125,14 @@ describe('WorkoutLifecycleService', () => {
 
     const first = await startWorkout(
       makeExerciseInstances(),
+      'A',
       1000,
       workoutRepo,
       appStateRepo
     )
     const second = await startWorkout(
       makeExerciseInstances(),
+      'B',
       2000,
       workoutRepo,
       appStateRepo
@@ -145,6 +149,7 @@ describe('WorkoutLifecycleService', () => {
       id: 'w-4',
       dateMs: 1000,
       exerciseInstances: [],
+      variation: 'A',
       startedAtMs: 1000,
       completed: false,
     }
@@ -176,6 +181,7 @@ describe('WorkoutLifecycleService', () => {
       id: 'w-5',
       dateMs: 1000,
       exerciseInstances: [],
+      variation: 'A',
       startedAtMs: 1000,
       completed: false,
     }
@@ -222,6 +228,7 @@ describe('WorkoutLifecycleService', () => {
       id: 'w-6',
       dateMs: 1000,
       exerciseInstances: [],
+      variation: 'A',
       startedAtMs: 1000,
       completed: true,
       completedAtMs: 2000,

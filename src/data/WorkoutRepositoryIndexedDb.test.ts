@@ -9,6 +9,7 @@ function makeWorkout(id: string): Workout {
     id,
     dateMs: 0,
     exerciseInstances: [],
+    variation: 'A',
     completed: false,
   }
 }

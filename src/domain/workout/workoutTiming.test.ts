@@ -13,6 +13,7 @@ function makeWorkout(
     id: 'workout-1',
     dateMs: 0,
     exerciseInstances: [],
+    variation: 'A',
     completed: false,
     ...overrides,
   }

@@ -41,7 +41,7 @@ export async function startOrResumeWorkout(
   const variation = getNextWorkoutVariation(workouts)
 
   const exerciseInstances = buildWorkoutExercises({
-    workoutId: crypto.randomUUID(),
+    workoutId: 'pending',
     variation,
     exerciseDefinitions,
     progressionStates,

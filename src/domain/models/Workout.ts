@@ -13,6 +13,12 @@ export interface Workout {
   /** Array of exercise instances performed in this workout */
   exerciseInstances: ExerciseInstance[]
 
+  /** Timestamp when this workout session was started (ms since epoch) */
+  startedAtMs?: number
+
+  /** Timestamp when this workout session was completed (ms since epoch) */
+  completedAtMs?: number
+
   /** Optional notes for the entire workout */
   notes?: string
 

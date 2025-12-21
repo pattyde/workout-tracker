@@ -21,4 +21,26 @@ export interface AppState {
 
   /** Variation of the most recently completed workout, if any */
   lastCompletedVariation?: 'A' | 'B'
+
+  /** Global equipment inventory (bars and plates) */
+  equipmentInventory?: EquipmentInventory
+}
+
+export interface EquipmentInventory {
+  bars: EquipmentInventoryBar[]
+  plates: EquipmentInventoryPlate[]
+}
+
+export interface EquipmentInventoryBar {
+  id: string
+  name: string
+  weight: number
+  unit: 'kg' | 'lb'
+  enabled: boolean
+}
+
+export interface EquipmentInventoryPlate {
+  weight: number
+  unit: 'kg' | 'lb'
+  quantity: number
 }

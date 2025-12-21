@@ -1,33 +1,10 @@
 import type { ExerciseInstance } from '../domain/models/ExerciseInstance'
 import type { Workout } from '../domain/models/Workout'
-import type { AppState } from '../domain/models/AppState'
 import type { WorkoutRepository } from '../data/WorkoutRepository'
 import type { AppStateRepository } from '../data/AppStateRepository'
 import { finishWorkout } from '../domain/workout/workoutTiming'
-
-function createDefaultAppState(): AppState {
-  return {
-    id: 'app',
-    activeStopwatch: null,
-    unitPreference: 'kg',
-    theme: 'system',
-    activeWorkoutId: undefined,
-    lastWorkoutId: undefined,
-    lastCompletedVariation: undefined,
-  }
-}
-
-async function getOrInitAppState(
-  repository: AppStateRepository
-): Promise<AppState> {
-  const existing = await repository.get()
-  if (existing) return existing
-
-  // First launch: persist a default singleton AppState.
-  const initial = createDefaultAppState()
-  await repository.save(initial)
-  return initial
-}
+import type { AppState } from '../domain/models/AppState'
+import { getOrInitAppState } from './appStateService'
 
 export async function startWorkout(
   exerciseInstances: ExerciseInstance[],

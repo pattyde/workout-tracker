@@ -3,13 +3,13 @@ import type { ProgressionState } from '../domain/models/ProgressionState'
 import type { Workout } from '../domain/models/Workout'
 import type { WorkoutRepository } from '../data/WorkoutRepository'
 import type { AppStateRepository } from '../data/AppStateRepository'
-import type { AppState } from '../domain/models/AppState'
 import { getNextWorkoutVariation } from '../domain/workout/workoutVariation'
 import { buildWorkoutExercises } from '../domain/workout/workoutBuilder'
 import {
   getActiveWorkout,
   startWorkout,
 } from './workoutLifecycleService'
+import { getOrInitAppState } from './appStateService'
 
 export interface StartOrResumeWorkoutParams {
   nowMs: number
@@ -17,29 +17,6 @@ export interface StartOrResumeWorkoutParams {
   progressionStates: Record<string, ProgressionState>
   workoutRepository: WorkoutRepository
   appStateRepository: AppStateRepository
-}
-
-function createDefaultAppState(): AppState {
-  return {
-    id: 'app',
-    activeStopwatch: null,
-    unitPreference: 'kg',
-    theme: 'system',
-    activeWorkoutId: undefined,
-    lastWorkoutId: undefined,
-    lastCompletedVariation: undefined,
-  }
-}
-
-async function getOrInitAppState(
-  repository: AppStateRepository
-): Promise<AppState> {
-  const existing = await repository.get()
-  if (existing) return existing
-
-  const initial = createDefaultAppState()
-  await repository.save(initial)
-  return initial
 }
 
 export async function startOrResumeWorkout(

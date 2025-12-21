@@ -1,30 +1,8 @@
-import type { AppState } from '../domain/models/AppState'
 import type { AppStateRepository } from '../data/AppStateRepository'
 import { startStopwatch } from '../domain/stopwatch/stopwatchLogic'
 import { dismissStopwatch } from '../domain/stopwatch/stopwatchLogic'
-
-function createDefaultAppState(): AppState {
-  return {
-    id: 'app',
-    activeStopwatch: null,
-    unitPreference: 'kg',
-    theme: 'system',
-    activeWorkoutId: undefined,
-    lastWorkoutId: undefined,
-    lastCompletedVariation: undefined,
-  }
-}
-
-async function getOrInitAppState(
-  repository: AppStateRepository
-): Promise<AppState> {
-  const existing = await repository.get()
-  if (existing) return existing
-
-  const initial = createDefaultAppState()
-  await repository.save(initial)
-  return initial
-}
+import type { AppState } from '../domain/models/AppState'
+import { getOrInitAppState } from './appStateService'
 
 export async function startOrRestartStopwatch(
   nowMs: number,

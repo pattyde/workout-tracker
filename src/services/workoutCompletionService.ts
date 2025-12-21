@@ -1,12 +1,12 @@
 import type { WorkoutRepository } from '../data/WorkoutRepository'
 import type { ProgressionStateRepository } from '../data/ProgressionStateRepository'
 import type { AppStateRepository } from '../data/AppStateRepository'
-import type { AppState } from '../domain/models/AppState'
 import type { Workout } from '../domain/models/Workout'
 import { dismissStopwatch } from '../domain/stopwatch/stopwatchLogic'
 import { finishWorkout } from '../domain/workout/workoutTiming'
 import { calculateNextProgression } from '../domain/progression/progressionLogic'
 import { getBarWeight } from '../domain/bars/barTypes'
+import { getOrInitAppState } from './appStateService'
 
 export interface CompleteActiveWorkoutParams {
   nowMs: number
@@ -15,28 +15,7 @@ export interface CompleteActiveWorkoutParams {
   appStateRepository: AppStateRepository
 }
 
-function createDefaultAppState(): AppState {
-  return {
-    id: 'app',
-    activeStopwatch: null,
-    unitPreference: 'kg',
-    theme: 'system',
-    activeWorkoutId: undefined,
-    lastWorkoutId: undefined,
-    lastCompletedVariation: undefined,
-  }
-}
-
-async function getOrInitAppState(
-  repository: AppStateRepository
-): Promise<AppState> {
-  const existing = await repository.get()
-  if (existing) return existing
-
-  const initial = createDefaultAppState()
-  await repository.save(initial)
-  return initial
-}
+import type { AppState } from '../domain/models/AppState'
 
 export async function completeActiveWorkout(
   params: CompleteActiveWorkoutParams

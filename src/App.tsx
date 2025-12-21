@@ -24,6 +24,7 @@ import { ensureProgressionSeed } from './services/progressionSeedService'
 import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
 import { updateExerciseWorkWeight } from './services/exerciseWorkWeightService'
 import ProgressionIncrementScreen from './ui/ProgressionIncrementScreen'
+import { getOrInitAppState } from './services/appStateService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -111,8 +112,9 @@ function AppBootstrap() {
 
         if (!cancelled) {
           setWorkout(activeWorkout)
-          const appState =
-            await appStateRepository.get()
+          const appState = await getOrInitAppState(
+            appStateRepository
+          )
           setActiveStopwatch(
             appState?.activeStopwatch ?? null
           )
@@ -173,6 +175,7 @@ function AppBootstrap() {
       <ProgressionIncrementScreen
         exerciseDefinitions={exerciseDefinitions}
         progressionStateRepository={progressionStateRepository}
+        appStateRepository={appStateRepository}
         onBack={() => setView('active')}
       />
     )

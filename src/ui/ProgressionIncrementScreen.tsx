@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { ProgressionState } from '../domain/models/ProgressionState'
+import type {
+  EquipmentInventory,
+  EquipmentInventoryPlate,
+} from '../domain/models/AppState'
 import type { ProgressionStateRepository } from '../data/ProgressionStateRepository'
+import type { AppStateRepository } from '../data/AppStateRepository'
 import {
   getBarType,
   listBarTypes,
 } from '../domain/bars/barTypes'
 import { updateProgressionIncrement } from '../services/progressionIncrementService'
 import { updatePreferredBarType } from '../services/preferredBarService'
+import { getOrInitAppState } from '../services/appStateService'
+import { updateEquipmentInventory } from '../services/equipmentInventoryService'
 
 interface ProgressionIncrementScreenProps {
   exerciseDefinitions: Record<string, ExerciseDefinition>
   progressionStateRepository: ProgressionStateRepository
+  appStateRepository: AppStateRepository
   onBack: () => void
 }
 
 export default function ProgressionIncrementScreen({
   exerciseDefinitions,
   progressionStateRepository,
+  appStateRepository,
   onBack,
 }: ProgressionIncrementScreenProps) {
   const [loading, setLoading] = useState(true)
@@ -31,7 +40,19 @@ export default function ProgressionIncrementScreen({
   const [barDrafts, setBarDrafts] = useState<
     Record<string, string>
   >({})
+  const [equipmentInventory, setEquipmentInventory] =
+    useState<EquipmentInventory | null>(null)
+  const [equipmentBarDrafts, setEquipmentBarDrafts] =
+    useState<Record<string, boolean>>({})
+  const [equipmentPlateDrafts, setEquipmentPlateDrafts] =
+    useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
+  const [equipmentSaving, setEquipmentSaving] =
+    useState(false)
+
+  function getPlateKey(plate: EquipmentInventoryPlate) {
+    return `${plate.weight}-${plate.unit}`
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -40,6 +61,9 @@ export default function ProgressionIncrementScreen({
       try {
         const all =
           await progressionStateRepository.listAll()
+        const appState = await getOrInitAppState(
+          appStateRepository
+        )
         if (!cancelled) {
           setProgressions(all)
           const nextDrafts: Record<string, string> = {}
@@ -55,6 +79,22 @@ export default function ProgressionIncrementScreen({
               'olympic-20kg'
           }
           setBarDrafts(nextBars)
+          const inventory = appState.equipmentInventory
+          if (inventory) {
+            setEquipmentInventory(inventory)
+            const barMap: Record<string, boolean> = {}
+            for (const bar of inventory.bars) {
+              barMap[bar.id] = bar.enabled
+            }
+            setEquipmentBarDrafts(barMap)
+            const plateMap: Record<string, string> = {}
+            for (const plate of inventory.plates) {
+              plateMap[getPlateKey(plate)] = String(
+                plate.quantity
+              )
+            }
+            setEquipmentPlateDrafts(plateMap)
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -74,7 +114,7 @@ export default function ProgressionIncrementScreen({
     return () => {
       cancelled = true
     }
-  }, [progressionStateRepository])
+  }, [progressionStateRepository, appStateRepository])
 
   if (loading) {
     return <div>Loading increments...</div>
@@ -239,6 +279,120 @@ export default function ProgressionIncrementScreen({
           </div>
         )
       })}
+      <h3>Equipment</h3>
+      {!equipmentInventory && (
+        <div>Loading equipment...</div>
+      )}
+      {equipmentInventory && (
+        <div>
+          <div>
+            <strong>Bars</strong>
+          </div>
+          {equipmentInventory.bars.map(bar => {
+            const enabled = equipmentBarDrafts[bar.id] ?? false
+            return (
+              <label key={bar.id}>
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  onChange={event => {
+                    const checked = event.target.checked
+                    setEquipmentBarDrafts(current => ({
+                      ...current,
+                      [bar.id]: checked,
+                    }))
+                  }}
+                />{' '}
+                {bar.name} ({bar.weight} {bar.unit})
+              </label>
+            )
+          })}
+          <div>
+            <strong>Plates</strong>
+          </div>
+          {equipmentInventory.plates.map(plate => {
+            const key = getPlateKey(plate)
+            const draft = equipmentPlateDrafts[key] ?? '0'
+            return (
+              <label key={key}>
+                {plate.weight} {plate.unit}{' '}
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={draft}
+                  onChange={event => {
+                    const value = event.target.value
+                    setEquipmentPlateDrafts(current => ({
+                      ...current,
+                      [key]: value,
+                    }))
+                  }}
+                />
+              </label>
+            )
+          })}
+          <button
+            type="button"
+            onClick={async () => {
+              if (!equipmentInventory) return
+              setEquipmentSaving(true)
+              setError(null)
+              try {
+                const updatedPlates =
+                  equipmentInventory.plates.map(plate => {
+                    const key = getPlateKey(plate)
+                    const raw =
+                      equipmentPlateDrafts[key] ?? '0'
+                    const quantity = Number(raw)
+                    if (
+                      !Number.isFinite(quantity) ||
+                      quantity < 0
+                    ) {
+                      throw new Error(
+                        'Plate quantities must be zero or greater'
+                      )
+                    }
+                    return {
+                      ...plate,
+                      quantity,
+                    }
+                  })
+                const updatedBars =
+                  equipmentInventory.bars.map(bar => ({
+                    ...bar,
+                    enabled:
+                      equipmentBarDrafts[bar.id] ?? false,
+                  }))
+                const updatedInventory: EquipmentInventory = {
+                  bars: updatedBars,
+                  plates: updatedPlates,
+                }
+                const updatedAppState =
+                  await updateEquipmentInventory(
+                    updatedInventory,
+                    appStateRepository
+                  )
+                setEquipmentInventory(
+                  updatedAppState.equipmentInventory ??
+                    updatedInventory
+                )
+              } catch (err) {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : 'Unknown error'
+                setError(message)
+              } finally {
+                setEquipmentSaving(false)
+              }
+            }}
+            disabled={equipmentSaving}
+          >
+            {equipmentSaving ? 'Saving...' : 'Save equipment'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

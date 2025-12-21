@@ -7,6 +7,9 @@ export interface AppState {
   /** Active stopwatch state, if any */
   activeStopwatch: StopwatchState | null
 
+  /** Active workout id, if any */
+  activeWorkoutId?: string
+
   /** Preferred unit for display */
   unitPreference: 'kg' | 'lb'
 

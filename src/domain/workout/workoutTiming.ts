@@ -38,16 +38,24 @@ export function finishWorkout(
 }
 
 /**
- * Returns elapsed milliseconds for a workout, or null if it hasn't started.
+ * Returns elapsed seconds for a completed workout, or null if invalid.
  */
-export function getWorkoutElapsedMs(
-  workout: Workout,
-  nowMs: number
+export function calculateWorkoutElapsedSeconds(
+  workout: Workout
 ): number | null {
   if (workout.startedAtMs == null) {
     return null
   }
 
-  const endMs = workout.completedAtMs ?? nowMs
-  return Math.max(0, endMs - workout.startedAtMs)
+  if (workout.completedAtMs == null) {
+    return null
+  }
+
+  if (workout.completedAtMs < workout.startedAtMs) {
+    return null
+  }
+
+  return Math.floor(
+    (workout.completedAtMs - workout.startedAtMs) / 1000
+  )
 }

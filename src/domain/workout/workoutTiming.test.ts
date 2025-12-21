@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   startWorkout,
   finishWorkout,
-  getWorkoutElapsedMs,
+  calculateWorkoutElapsedSeconds,
 } from './workoutTiming'
 import type { Workout } from '../models/Workout'
 
@@ -53,16 +53,9 @@ describe('workout timing', () => {
 
   it('returns null elapsed time before a workout is started', () => {
     const workout = makeWorkout()
-    const elapsed = getWorkoutElapsedMs(workout, 5000)
+    const elapsed = calculateWorkoutElapsedSeconds(workout)
 
     expect(elapsed).toBeNull()
-  })
-
-  it('returns live elapsed time for an in-progress workout', () => {
-    const workout = makeWorkout({ startedAtMs: 1000 })
-    const elapsed = getWorkoutElapsedMs(workout, 3500)
-
-    expect(elapsed).toBe(2500)
   })
 
   it('returns elapsed time for a completed workout', () => {
@@ -70,8 +63,35 @@ describe('workout timing', () => {
       startedAtMs: 1000,
       completedAtMs: 5000,
     })
-    const elapsed = getWorkoutElapsedMs(workout, 9000)
+    const elapsed = calculateWorkoutElapsedSeconds(workout)
 
-    expect(elapsed).toBe(4000)
+    expect(elapsed).toBe(4)
+  })
+
+  it('returns null for incomplete workout', () => {
+    const workout = makeWorkout({ startedAtMs: 1000 })
+    const elapsed = calculateWorkoutElapsedSeconds(workout)
+
+    expect(elapsed).toBeNull()
+  })
+
+  it('returns null when completedAtMs is before startedAtMs', () => {
+    const workout = makeWorkout({
+      startedAtMs: 5000,
+      completedAtMs: 1000,
+    })
+    const elapsed = calculateWorkoutElapsedSeconds(workout)
+
+    expect(elapsed).toBeNull()
+  })
+
+  it('returns stable elapsed time across reloads', () => {
+    const workout = makeWorkout({
+      startedAtMs: 1000,
+      completedAtMs: 9000,
+    })
+    const elapsed = calculateWorkoutElapsedSeconds(workout)
+
+    expect(elapsed).toBe(8)
   })
 })

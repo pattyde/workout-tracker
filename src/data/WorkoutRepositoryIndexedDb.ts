@@ -2,8 +2,9 @@ import type { Workout } from '../domain/models/Workout'
 import type { WorkoutRepository } from './WorkoutRepository'
 
 const DB_NAME = 'workout-tracker'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'workouts'
+const APP_STATE_STORE = 'app_state'
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -13,6 +14,9 @@ function openDb(): Promise<IDBDatabase> {
       const db = request.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains(APP_STATE_STORE)) {
+        db.createObjectStore(APP_STATE_STORE, { keyPath: 'id' })
       }
     }
 

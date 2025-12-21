@@ -2,9 +2,10 @@ import type { AppState } from '../domain/models/AppState'
 import type { AppStateRepository } from './AppStateRepository'
 
 const DB_NAME = 'workout-tracker'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_NAME = 'app_state'
 const WORKOUT_STORE = 'workouts'
+const PROGRESSION_STORE = 'progression_state'
 const APP_STATE_ID = 'app'
 
 function openDb(): Promise<IDBDatabase> {
@@ -18,6 +19,11 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(WORKOUT_STORE)) {
         db.createObjectStore(WORKOUT_STORE, { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains(PROGRESSION_STORE)) {
+        db.createObjectStore(PROGRESSION_STORE, {
+          keyPath: 'exerciseDefinitionId',
+        })
       }
     }
 

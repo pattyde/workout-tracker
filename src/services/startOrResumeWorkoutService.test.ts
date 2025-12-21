@@ -172,6 +172,7 @@ describe('startOrResumeWorkout', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'w-1',
+      lastCompletedVariation: undefined,
     })
 
     const result = await startOrResumeWorkout({
@@ -190,6 +191,14 @@ describe('startOrResumeWorkout', () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
     vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-2')
+    await appStateRepo.save({
+      id: 'app',
+      activeStopwatch: null,
+      unitPreference: 'kg',
+      theme: 'system',
+      activeWorkoutId: undefined,
+      lastCompletedVariation: undefined,
+    })
 
     const result = await startOrResumeWorkout({
       nowMs: 1000,
@@ -214,6 +223,7 @@ describe('startOrResumeWorkout', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'missing',
+      lastCompletedVariation: undefined,
     })
 
     const result = await startOrResumeWorkout({
@@ -235,6 +245,14 @@ describe('startOrResumeWorkout', () => {
     await workoutRepo.save(
       makeCompletedWorkout('w-10', 'A', 1000)
     )
+    await appStateRepo.save({
+      id: 'app',
+      activeStopwatch: null,
+      unitPreference: 'kg',
+      theme: 'system',
+      activeWorkoutId: undefined,
+      lastCompletedVariation: undefined,
+    })
 
     const result = await startOrResumeWorkout({
       nowMs: 2000,

@@ -13,6 +13,7 @@ function createDefaultAppState(): AppState {
     theme: 'system',
     activeWorkoutId: undefined,
     lastWorkoutId: undefined,
+    lastCompletedVariation: undefined,
   }
 }
 

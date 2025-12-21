@@ -1,11 +1,11 @@
-import type { Workout } from '../domain/models/Workout'
-import type { WorkoutRepository } from './WorkoutRepository'
+import type { ProgressionState } from '../domain/models/ProgressionState'
+import type { ProgressionStateRepository } from './ProgressionStateRepository'
 
 const DB_NAME = 'workout-tracker'
 const DB_VERSION = 3
-const STORE_NAME = 'workouts'
+const STORE_NAME = 'progression_state'
+const WORKOUT_STORE = 'workouts'
 const APP_STATE_STORE = 'app_state'
-const PROGRESSION_STORE = 'progression_state'
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -14,15 +14,15 @@ function openDb(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+        db.createObjectStore(STORE_NAME, {
+          keyPath: 'exerciseDefinitionId',
+        })
+      }
+      if (!db.objectStoreNames.contains(WORKOUT_STORE)) {
+        db.createObjectStore(WORKOUT_STORE, { keyPath: 'id' })
       }
       if (!db.objectStoreNames.contains(APP_STATE_STORE)) {
         db.createObjectStore(APP_STATE_STORE, { keyPath: 'id' })
-      }
-      if (!db.objectStoreNames.contains(PROGRESSION_STORE)) {
-        db.createObjectStore(PROGRESSION_STORE, {
-          keyPath: 'exerciseDefinitionId',
-        })
       }
     }
 
@@ -50,43 +50,49 @@ function transactionDone(tx: IDBTransaction): Promise<void> {
   })
 }
 
-export class IndexedDbWorkoutRepository
-  implements WorkoutRepository
+export class IndexedDbProgressionStateRepository
+  implements ProgressionStateRepository
 {
-  async getById(id: string): Promise<Workout | null> {
+  async getByExerciseDefinitionId(
+    exerciseDefinitionId: string
+  ): Promise<ProgressionState | null> {
     const db = await openDb()
     const tx = db.transaction(STORE_NAME, 'readonly')
     const store = tx.objectStore(STORE_NAME)
-    const result = await requestToPromise(store.get(id))
+    const result = await requestToPromise(
+      store.get(exerciseDefinitionId)
+    )
     await transactionDone(tx)
     db.close()
-    return (result ?? null) as Workout | null
+    return (result ?? null) as ProgressionState | null
   }
 
-  async listAll(): Promise<Workout[]> {
+  async listAll(): Promise<ProgressionState[]> {
     const db = await openDb()
     const tx = db.transaction(STORE_NAME, 'readonly')
     const store = tx.objectStore(STORE_NAME)
     const result = await requestToPromise(store.getAll())
     await transactionDone(tx)
     db.close()
-    return result as Workout[]
+    return result as ProgressionState[]
   }
 
-  async save(workout: Workout): Promise<void> {
+  async save(state: ProgressionState): Promise<void> {
     const db = await openDb()
     const tx = db.transaction(STORE_NAME, 'readwrite')
     const store = tx.objectStore(STORE_NAME)
-    await requestToPromise(store.put(workout))
+    await requestToPromise(store.put(state))
     await transactionDone(tx)
     db.close()
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteByExerciseDefinitionId(
+    exerciseDefinitionId: string
+  ): Promise<void> {
     const db = await openDb()
     const tx = db.transaction(STORE_NAME, 'readwrite')
     const store = tx.objectStore(STORE_NAME)
-    await requestToPromise(store.delete(id))
+    await requestToPromise(store.delete(exerciseDefinitionId))
     await transactionDone(tx)
     db.close()
   }

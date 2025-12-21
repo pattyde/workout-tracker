@@ -18,4 +18,7 @@ export interface AppState {
 
   /** ID of the most recent workout, if any */
   lastWorkoutId?: string
+
+  /** Variation of the most recently completed workout, if any */
+  lastCompletedVariation?: 'A' | 'B'
 }

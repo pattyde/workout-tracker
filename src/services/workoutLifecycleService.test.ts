@@ -108,6 +108,7 @@ describe('WorkoutLifecycleService', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'w-2',
+      lastCompletedVariation: undefined,
     })
 
     const active = await getActiveWorkout(
@@ -160,6 +161,7 @@ describe('WorkoutLifecycleService', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'w-4',
+      lastCompletedVariation: undefined,
     })
 
     const completed = await completeActiveWorkout(
@@ -192,6 +194,7 @@ describe('WorkoutLifecycleService', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'w-5',
+      lastCompletedVariation: undefined,
     })
 
     await abandonActiveWorkout(workoutRepo, appStateRepo)
@@ -210,6 +213,7 @@ describe('WorkoutLifecycleService', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'missing',
+      lastCompletedVariation: undefined,
     })
 
     const active = await getActiveWorkout(
@@ -240,6 +244,7 @@ describe('WorkoutLifecycleService', () => {
       unitPreference: 'kg',
       theme: 'system',
       activeWorkoutId: 'w-6',
+      lastCompletedVariation: undefined,
     })
 
     const active = await getActiveWorkout(

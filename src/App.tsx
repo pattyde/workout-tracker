@@ -5,6 +5,7 @@ import type { Workout } from './domain/models/Workout'
 import type { AppState } from './domain/models/AppState'
 import { IndexedDbWorkoutRepository } from './data/WorkoutRepositoryIndexedDb'
 import { IndexedDbAppStateRepository } from './data/AppStateRepositoryIndexedDb'
+import { IndexedDbProgressionStateRepository } from './data/ProgressionStateRepositoryIndexedDb'
 import {
   STRONGLIFTS_5X5_EXERCISES,
   STRONGLIFTS_5X5_INITIAL_PROGRESSIONS,
@@ -18,6 +19,8 @@ import {
   updateActiveStopwatch,
   dismissActiveStopwatch,
 } from './services/stopwatchService'
+import { completeActiveWorkout } from './services/workoutCompletionService'
+import { ensureProgressionSeed } from './services/progressionSeedService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -52,23 +55,27 @@ function AppBootstrap() {
     () => new IndexedDbAppStateRepository(),
     []
   )
+  const progressionStateRepository = useMemo(
+    () => new IndexedDbProgressionStateRepository(),
+    []
+  )
   const exerciseDefinitions = useMemo(
     () => buildDefinitionMap(STRONGLIFTS_5X5_EXERCISES),
     []
   )
-  const progressionStates = useMemo(
-    () =>
-      buildProgressionMap(
-        STRONGLIFTS_5X5_INITIAL_PROGRESSIONS
-      ),
-    []
-  )
+  const [, setProgressionStates] = useState<
+    Record<string, ProgressionState>
+  >({})
 
   const [workout, setWorkout] = useState<Workout | null>(
     null
   )
   const [activeStopwatch, setActiveStopwatch] =
     useState<AppState['activeStopwatch']>(null)
+  const [completionError, setCompletionError] = useState<
+    string | null
+  >(null)
+  const [completing, setCompleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -77,10 +84,21 @@ function AppBootstrap() {
 
     async function boot() {
       try {
+        await ensureProgressionSeed(
+          STRONGLIFTS_5X5_INITIAL_PROGRESSIONS,
+          progressionStateRepository
+        )
+        const progressions =
+          await progressionStateRepository.listAll()
+        const progressionMap = buildProgressionMap(
+          progressions
+        )
+        setProgressionStates(progressionMap)
+
         const activeWorkout = await startOrResumeWorkout({
           nowMs: Date.now(),
           exerciseDefinitions,
-          progressionStates,
+          progressionStates: progressionMap,
           workoutRepository,
           appStateRepository,
         })
@@ -113,9 +131,9 @@ function AppBootstrap() {
     }
   }, [
     exerciseDefinitions,
-    progressionStates,
     workoutRepository,
     appStateRepository,
+    progressionStateRepository,
   ])
 
   if (loading) {
@@ -181,6 +199,43 @@ function AppBootstrap() {
           )
         }}
       />
+      <button
+        type="button"
+        onClick={async () => {
+          if (!workout || completing) return
+          setCompleting(true)
+          setCompletionError(null)
+          try {
+            await completeActiveWorkout({
+              nowMs: Date.now(),
+              workoutRepository,
+              progressionStateRepository,
+              appStateRepository,
+            })
+            const updatedProgressions =
+              await progressionStateRepository.listAll()
+            setProgressionStates(
+              buildProgressionMap(updatedProgressions)
+            )
+            setWorkout(null)
+            setActiveStopwatch(null)
+          } catch (err) {
+            const message =
+              err instanceof Error
+                ? err.message
+                : 'Unknown error'
+            setCompletionError(message)
+          } finally {
+            setCompleting(false)
+          }
+        }}
+        disabled={completing}
+      >
+        {completing ? 'Completing...' : 'Complete Workout'}
+      </button>
+      {completionError && (
+        <div>Error: {completionError}</div>
+      )}
     </div>
   )
 }

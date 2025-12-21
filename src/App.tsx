@@ -13,6 +13,8 @@ import { startOrResumeWorkout } from './services/startOrResumeWorkoutService'
 import ActiveWorkoutView from './ui/ActiveWorkoutView'
 import { applySetTapToWorkout } from './services/setTapService'
 import { StopwatchDisplay } from './ui/StopwatchDisplay'
+import type { NotificationEvent } from './domain/models/NotificationEvents'
+import { updateActiveStopwatch } from './services/stopwatchService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -127,9 +129,26 @@ function AppBootstrap() {
 
   return (
     <div>
-      {activeStopwatch?.startTime != null && (
-        <StopwatchDisplay stopwatch={activeStopwatch} />
-      )}
+      {activeStopwatch?.startTime != null &&
+        !activeStopwatch.dismissed && (
+          <StopwatchDisplay
+            stopwatch={activeStopwatch}
+            onEvents={(events: NotificationEvent[]) => {
+              events.forEach(event => {
+                console.info(
+                  `[Rest Alert] ${event.message}`
+                )
+              })
+            }}
+            onStopwatchUpdate={updatedStopwatch => {
+              setActiveStopwatch(updatedStopwatch)
+              void updateActiveStopwatch(
+                updatedStopwatch,
+                appStateRepository
+              )
+            }}
+          />
+        )}
       <ActiveWorkoutView
         workout={workout}
         exerciseDefinitions={exerciseDefinitions}

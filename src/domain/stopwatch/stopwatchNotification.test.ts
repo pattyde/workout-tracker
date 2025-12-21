@@ -30,7 +30,9 @@ describe('Stopwatch Notification Mapping', () => {
 
     expect(event.type).toBe('rest-alert')
     expect(event.thresholdSec).toBe(90)
-    expect(event.message).toBe('1m 30s rest completed')
+    expect(event.message).toBe(
+      '1 minute 30 seconds rest completed'
+    )
   })
 
   it('does not emit notifications for already fired alerts', () => {

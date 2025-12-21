@@ -38,3 +38,16 @@ export async function startOrRestartStopwatch(
   await appStateRepository.save(updated)
   return updated
 }
+
+export async function updateActiveStopwatch(
+  stopwatch: AppState['activeStopwatch'],
+  appStateRepository: AppStateRepository
+): Promise<AppState> {
+  const appState = await getOrInitAppState(appStateRepository)
+  const updated: AppState = {
+    ...appState,
+    activeStopwatch: stopwatch,
+  }
+  await appStateRepository.save(updated)
+  return updated
+}

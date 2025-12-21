@@ -269,11 +269,25 @@ function WorkoutDetailsView({
         return (
           <div key={exercise.id}>
             <h3>{name}</h3>
-            <div>
-              Work weight:{' '}
-              {workWeight != null
-                ? `${workWeight} ${unit}`
-                : '—'}
+            <div
+              aria-label="Work weight"
+              style={{
+                display: 'inline-block',
+                padding: '6px 10px',
+                border: '1px solid #c9c9c9',
+                borderRadius: '6px',
+                background: '#f7f7f7',
+                marginBottom: '8px',
+              }}
+            >
+              <div style={{ fontSize: '0.85rem' }}>
+                Work weight
+              </div>
+              <div style={{ fontWeight: 600 }}>
+                {workWeight != null
+                  ? `${workWeight} ${unit}`
+                  : '—'}
+              </div>
             </div>
             {orderedSets.map((set, index) => (
               <button

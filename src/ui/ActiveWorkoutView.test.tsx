@@ -55,9 +55,8 @@ describe('ActiveWorkoutView', () => {
 
     expect(screen.getByText('Variation A')).toBeInTheDocument()
     expect(screen.getByText('Squat')).toBeInTheDocument()
-    expect(
-      screen.getByText('Work weight: 20 kg')
-    ).toBeInTheDocument()
+    expect(screen.getByText('Work weight')).toBeInTheDocument()
+    expect(screen.getByText('20 kg')).toBeInTheDocument()
     expect(screen.getByText('Set 1')).toBeInTheDocument()
     expect(screen.getByText('Reps: 5')).toBeInTheDocument()
     expect(screen.queryByText('20 x 5')).toBeNull()

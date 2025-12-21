@@ -160,6 +160,8 @@ function AppBootstrap() {
         <WorkoutHistoryScreen
           workoutRepository={workoutRepository}
           exerciseDefinitions={exerciseDefinitions}
+          progressionStateRepository={progressionStateRepository}
+          appStateRepository={appStateRepository}
         />
       </div>
     )

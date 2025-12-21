@@ -70,7 +70,9 @@ export class IndexedDbWorkoutRepository
     const result = await requestToPromise(store.getAll())
     await transactionDone(tx)
     db.close()
-    return result as Workout[]
+    return (result as Workout[]).filter(
+      workout => !workout.deleted
+    )
   }
 
   async save(workout: Workout): Promise<void> {

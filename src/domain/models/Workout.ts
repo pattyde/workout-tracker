@@ -16,6 +16,9 @@ export interface Workout {
   /** Workout variation for program rotation */
   variation: 'A' | 'B'
 
+  /** Whether this workout has been soft-deleted */
+  deleted?: boolean
+
   /** Timestamp when this workout session was started (ms since epoch) */
   startedAtMs?: number
 

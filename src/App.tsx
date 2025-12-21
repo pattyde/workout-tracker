@@ -23,6 +23,7 @@ import { completeActiveWorkout } from './services/workoutCompletionService'
 import { ensureProgressionSeed } from './services/progressionSeedService'
 import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
 import { updateExerciseWorkWeight } from './services/exerciseWorkWeightService'
+import ProgressionIncrementScreen from './ui/ProgressionIncrementScreen'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -78,9 +79,9 @@ function AppBootstrap() {
     string | null
   >(null)
   const [completing, setCompleting] = useState(false)
-  const [view, setView] = useState<'active' | 'history'>(
-    'active'
-  )
+  const [view, setView] = useState<
+    'active' | 'history' | 'progression'
+  >('active')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -167,6 +168,15 @@ function AppBootstrap() {
       </div>
     )
   }
+  if (view === 'progression') {
+    return (
+      <ProgressionIncrementScreen
+        exerciseDefinitions={exerciseDefinitions}
+        progressionStateRepository={progressionStateRepository}
+        onBack={() => setView('active')}
+      />
+    )
+  }
 
   if (!workout) {
     return (
@@ -176,6 +186,12 @@ function AppBootstrap() {
           onClick={() => setView('history')}
         >
           View History
+        </button>
+        <button
+          type="button"
+          onClick={() => setView('progression')}
+        >
+          Edit Increments
         </button>
         <div>No active workout found.</div>
       </div>
@@ -189,6 +205,12 @@ function AppBootstrap() {
         onClick={() => setView('history')}
       >
         View History
+      </button>
+      <button
+        type="button"
+        onClick={() => setView('progression')}
+      >
+        Edit Increments
       </button>
       {activeStopwatch?.startTime != null &&
         !activeStopwatch.dismissed && (

@@ -434,4 +434,68 @@ describe('completeActiveWorkout', () => {
 
     expect(progression?.currentWeight).toBe(82.5)
   })
+
+  it('uses updated increment for progression', async () => {
+    const workoutRepo = new MemoryWorkoutRepository()
+    const progressionRepo =
+      new MemoryProgressionStateRepository()
+    const appStateRepo = new MemoryAppStateRepository()
+
+    const workout: Workout = {
+      id: 'w-6',
+      dateMs: 0,
+      exerciseInstances: [
+        {
+          id: 'ex-1',
+          exerciseDefinitionId: 'squat',
+          workoutId: 'w-6',
+          orderIndex: 0,
+          sets: [
+            makeWorkSet({
+              status: 'completed',
+              actualReps: 5,
+            }),
+          ],
+          workWeight: 60,
+          barTypeId: 'olympic-20kg',
+          useSharedBarLoading: false,
+        },
+      ],
+      variation: 'A',
+      startedAtMs: 0,
+      completed: false,
+    }
+
+    await workoutRepo.save(workout)
+    await progressionRepo.save({
+      id: 'p7',
+      exerciseDefinitionId: 'squat',
+      currentWeight: 60,
+      failureStreak: 0,
+      plateIncrement: 5,
+      unit: 'kg',
+    })
+    await appStateRepo.save({
+      id: 'app',
+      activeStopwatch: null,
+      unitPreference: 'kg',
+      theme: 'system',
+      activeWorkoutId: 'w-6',
+      lastCompletedVariation: undefined,
+    })
+
+    await completeActiveWorkout({
+      nowMs: 6000,
+      workoutRepository: workoutRepo,
+      progressionStateRepository: progressionRepo,
+      appStateRepository: appStateRepo,
+    })
+
+    const progression =
+      await progressionRepo.getByExerciseDefinitionId(
+        'squat'
+      )
+
+    expect(progression?.currentWeight).toBe(65)
+  })
 })

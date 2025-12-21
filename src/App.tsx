@@ -125,7 +125,9 @@ function AppBootstrap() {
         const updated = await applySetTapToWorkout(
           workout,
           setId,
-          workoutRepository
+          workoutRepository,
+          appStateRepository,
+          Date.now()
         )
         setWorkout(updated)
       }}

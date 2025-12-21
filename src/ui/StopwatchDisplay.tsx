@@ -6,6 +6,7 @@ interface StopwatchDisplayProps {
   stopwatch: StopwatchState
   onEvents?: (events: NotificationEvent[]) => void
   onStopwatchUpdate?: (stopwatch: StopwatchState) => void
+  onDismiss?: () => void
 }
 
 function formatElapsed(seconds: number): string {
@@ -22,13 +23,25 @@ export function StopwatchDisplay({
   stopwatch,
   onEvents,
   onStopwatchUpdate,
+  onDismiss,
 }: StopwatchDisplayProps) {
   const elapsedSeconds = useStopwatchElapsed(stopwatch, {
     onEvents,
     onStopwatchUpdate,
   })
 
-  return <div>Rest timer: {formatElapsed(elapsedSeconds)}</div>
+  return (
+    <div>
+      <div>Rest timer: {formatElapsed(elapsedSeconds)}</div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        disabled={!onDismiss}
+      >
+        Stop
+      </button>
+    </div>
+  )
 }
 
 export { formatElapsed }

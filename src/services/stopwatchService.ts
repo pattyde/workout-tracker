@@ -1,6 +1,7 @@
 import type { AppState } from '../domain/models/AppState'
 import type { AppStateRepository } from '../data/AppStateRepository'
 import { startStopwatch } from '../domain/stopwatch/stopwatchLogic'
+import { dismissStopwatch } from '../domain/stopwatch/stopwatchLogic'
 
 function createDefaultAppState(): AppState {
   return {
@@ -48,6 +49,25 @@ export async function updateActiveStopwatch(
     ...appState,
     activeStopwatch: stopwatch,
   }
+  await appStateRepository.save(updated)
+  return updated
+}
+
+export async function dismissActiveStopwatch(
+  appStateRepository: AppStateRepository
+): Promise<AppState> {
+  const appState = await getOrInitAppState(appStateRepository)
+  if (!appState.activeStopwatch) {
+    return appState
+  }
+
+  const updated: AppState = {
+    ...appState,
+    activeStopwatch: dismissStopwatch(
+      appState.activeStopwatch
+    ),
+  }
+
   await appStateRepository.save(updated)
   return updated
 }

@@ -77,4 +77,21 @@ describe('getStopwatchNotificationEvents', () => {
     expect(first.events).toHaveLength(1)
     expect(second.events).toHaveLength(1)
   })
+
+  it('does not fire events when dismissed', () => {
+    const state = startStopwatch(0, [90])
+    const dismissed = {
+      ...state,
+      startTime: null,
+      dismissed: true,
+    }
+    const result = getStopwatchNotificationEvents(
+      dismissed,
+      90,
+      90000
+    )
+
+    expect(result.events).toHaveLength(0)
+    expect(result.updatedStopwatch).toBe(dismissed)
+  })
 })

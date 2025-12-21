@@ -14,7 +14,10 @@ import ActiveWorkoutView from './ui/ActiveWorkoutView'
 import { applySetTapToWorkout } from './services/setTapService'
 import { StopwatchDisplay } from './ui/StopwatchDisplay'
 import type { NotificationEvent } from './domain/models/NotificationEvents'
-import { updateActiveStopwatch } from './services/stopwatchService'
+import {
+  updateActiveStopwatch,
+  dismissActiveStopwatch,
+} from './services/stopwatchService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -146,6 +149,15 @@ function AppBootstrap() {
                 updatedStopwatch,
                 appStateRepository
               )
+            }}
+            onDismiss={() => {
+              void dismissActiveStopwatch(
+                appStateRepository
+              ).then(updatedAppState => {
+                setActiveStopwatch(
+                  updatedAppState.activeStopwatch ?? null
+                )
+              })
             }}
           />
         )}

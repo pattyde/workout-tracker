@@ -21,6 +21,7 @@ import {
 } from './services/stopwatchService'
 import { completeActiveWorkout } from './services/workoutCompletionService'
 import { ensureProgressionSeed } from './services/progressionSeedService'
+import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -76,6 +77,9 @@ function AppBootstrap() {
     string | null
   >(null)
   const [completing, setCompleting] = useState(false)
+  const [view, setView] = useState<'active' | 'history'>(
+    'active'
+  )
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -144,12 +148,45 @@ function AppBootstrap() {
     return <div>Error: {error}</div>
   }
 
+  if (view === 'history') {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setView('active')}
+        >
+          Back to Workout
+        </button>
+        <WorkoutHistoryScreen
+          workoutRepository={workoutRepository}
+          exerciseDefinitions={exerciseDefinitions}
+        />
+      </div>
+    )
+  }
+
   if (!workout) {
-    return <div>No active workout found.</div>
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setView('history')}
+        >
+          View History
+        </button>
+        <div>No active workout found.</div>
+      </div>
+    )
   }
 
   return (
     <div>
+      <button
+        type="button"
+        onClick={() => setView('history')}
+      >
+        View History
+      </button>
       {activeStopwatch?.startTime != null &&
         !activeStopwatch.dismissed && (
           <StopwatchDisplay

@@ -65,7 +65,8 @@ export function buildWorkoutExercises(
       orderIndex: index,
       sets,
       workWeight: progression.currentWeight,
-      barTypeId: DEFAULT_BAR_TYPE_ID,
+      barTypeId:
+        progression.preferredBarTypeId ?? DEFAULT_BAR_TYPE_ID,
       useSharedBarLoading: false,
     }
   })

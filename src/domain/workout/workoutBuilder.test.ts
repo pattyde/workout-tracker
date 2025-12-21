@@ -52,46 +52,51 @@ const EXERCISE_DEFINITIONS: Record<
 
 const PROGRESSION_STATES: Record<string, ProgressionState> =
   {
-    squat: {
-      id: 'p-squat',
-      exerciseDefinitionId: 'squat',
-      currentWeight: 100,
-      failureStreak: 0,
-      plateIncrement: 2.5,
-      unit: 'kg',
-    },
-    'bench-press': {
-      id: 'p-bench',
-      exerciseDefinitionId: 'bench-press',
-      currentWeight: 80,
-      failureStreak: 0,
-      plateIncrement: 2.5,
-      unit: 'kg',
-    },
-    'barbell-row': {
-      id: 'p-row',
-      exerciseDefinitionId: 'barbell-row',
-      currentWeight: 60,
-      failureStreak: 0,
-      plateIncrement: 2.5,
-      unit: 'kg',
-    },
-    'overhead-press': {
-      id: 'p-ohp',
-      exerciseDefinitionId: 'overhead-press',
-      currentWeight: 50,
-      failureStreak: 0,
-      plateIncrement: 2.5,
-      unit: 'kg',
-    },
-    deadlift: {
-      id: 'p-deadlift',
-      exerciseDefinitionId: 'deadlift',
-      currentWeight: 140,
-      failureStreak: 0,
-      plateIncrement: 2.5,
-      unit: 'kg',
-    },
+  squat: {
+    id: 'p-squat',
+    exerciseDefinitionId: 'squat',
+    currentWeight: 100,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
+  'bench-press': {
+    id: 'p-bench',
+    exerciseDefinitionId: 'bench-press',
+    currentWeight: 80,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
+  'barbell-row': {
+    id: 'p-row',
+    exerciseDefinitionId: 'barbell-row',
+    currentWeight: 60,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
+  'overhead-press': {
+    id: 'p-ohp',
+    exerciseDefinitionId: 'overhead-press',
+    currentWeight: 50,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
+  deadlift: {
+    id: 'p-deadlift',
+    exerciseDefinitionId: 'deadlift',
+    currentWeight: 140,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
   }
 
 describe('buildWorkoutExercises', () => {
@@ -115,6 +120,26 @@ describe('buildWorkoutExercises', () => {
     expect(squat.sets[0]?.targetReps).toBe(5)
     expect(squat.sets[0]?.targetWeight).toBe(100)
     expect(squat.workWeight).toBe(100)
+    expect(squat.barTypeId).toBe('olympic-20kg')
+  })
+
+  it('uses preferred bar type when provided', () => {
+    const exercises = buildWorkoutExercises({
+      workoutId: 'w-5',
+      variation: 'A',
+      exerciseDefinitions: EXERCISE_DEFINITIONS,
+      progressionStates: {
+        ...PROGRESSION_STATES,
+        squat: {
+          ...PROGRESSION_STATES.squat,
+          preferredBarTypeId: 'training-15kg',
+        },
+      },
+    })
+
+    const squat = exercises[0]
+    if (!squat) throw new Error('Expected squat')
+    expect(squat.barTypeId).toBe('training-15kg')
   })
 
   it('builds variation B with correct exercises and sets', () => {
@@ -137,6 +162,7 @@ describe('buildWorkoutExercises', () => {
     expect(deadlift.sets[0]?.targetReps).toBe(5)
     expect(deadlift.sets[0]?.targetWeight).toBe(140)
     expect(deadlift.workWeight).toBe(140)
+    expect(deadlift.barTypeId).toBe('olympic-20kg')
   })
 
   it('sets correct reps, weights, and status for all sets', () => {

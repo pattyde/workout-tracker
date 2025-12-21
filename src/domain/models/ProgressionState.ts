@@ -33,4 +33,7 @@ export interface ProgressionState {
 
   /** Unit of measurement for this exercise */
   unit: 'kg' | 'lb'
+
+  /** Preferred bar type for future workouts (defaults to olympic-20kg) */
+  preferredBarTypeId?: string
 }

@@ -27,6 +27,14 @@ export default function ActiveWorkoutView({
             exerciseDefinitions[exercise.exerciseDefinitionId]
               ?.name ?? 'Unknown Exercise'
           }
+          unit={
+            exerciseDefinitions[exercise.exerciseDefinitionId]
+              ?.defaultUnit ?? 'kg'
+          }
+          workWeight={
+            exercise.sets.find(set => set.type === 'work')
+              ?.targetWeight ?? null
+          }
           sets={exercise.sets}
           onSetTap={onSetTap}
         />
@@ -38,12 +46,16 @@ export default function ActiveWorkoutView({
 interface ExerciseCardProps {
   exerciseDefinitionName: string
   sets: Workout['exerciseInstances'][number]['sets']
+  unit: ExerciseDefinition['defaultUnit']
+  workWeight: number | null
   onSetTap: (setId: string) => void
 }
 
 function ExerciseCard({
   exerciseDefinitionName,
   sets,
+  unit,
+  workWeight,
   onSetTap,
 }: ExerciseCardProps) {
   const orderedSets = [...sets].sort(
@@ -53,11 +65,14 @@ function ExerciseCard({
   return (
     <div>
       <h3>{exerciseDefinitionName}</h3>
+      <div>
+        Work weight:{' '}
+        {workWeight != null ? `${workWeight} ${unit}` : '—'}
+      </div>
       {orderedSets.map((set, index) => (
         <SetRow
           key={set.id}
           index={index}
-          targetWeight={set.targetWeight}
           targetReps={set.targetReps}
           status={set.status}
           actualReps={set.actualReps}
@@ -70,7 +85,6 @@ function ExerciseCard({
 
 interface SetRowProps {
   index: number
-  targetWeight: number
   targetReps: number
   status: Workout['exerciseInstances'][number]['sets'][number]['status']
   actualReps?: number
@@ -79,7 +93,6 @@ interface SetRowProps {
 
 function SetRow({
   index,
-  targetWeight,
   targetReps,
   status,
   actualReps,
@@ -93,9 +106,7 @@ function SetRow({
   return (
     <button type="button" onClick={onTap}>
       <div>Set {index + 1}</div>
-      <div>
-        {targetWeight} x {repsDisplay}
-      </div>
+      <div>Reps: {repsDisplay}</div>
       <div>Status: {status}</div>
     </button>
   )

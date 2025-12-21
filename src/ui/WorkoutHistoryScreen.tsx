@@ -257,6 +257,12 @@ function WorkoutDetailsView({
         const name =
           exerciseDefinitions[exercise.exerciseDefinitionId]
             ?.name ?? 'Unknown Exercise'
+        const unit =
+          exerciseDefinitions[exercise.exerciseDefinitionId]
+            ?.defaultUnit ?? 'kg'
+        const workWeight =
+          exercise.sets.find(set => set.type === 'work')
+            ?.targetWeight ?? null
         const orderedSets = [...exercise.sets].sort(
           (a, b) => a.orderIndex - b.orderIndex
         )
@@ -264,6 +270,12 @@ function WorkoutDetailsView({
         return (
           <div key={exercise.id}>
             <h3>{name}</h3>
+            <div>
+              Work weight:{' '}
+              {workWeight != null
+                ? `${workWeight} ${unit}`
+                : '—'}
+            </div>
             {orderedSets.map((set, index) => (
               <button
                 key={set.id}
@@ -273,7 +285,10 @@ function WorkoutDetailsView({
               >
                 <div>Set {index + 1}</div>
                 <div>
-                  {set.targetWeight} x {set.targetReps}
+                  Reps:{' '}
+                  {set.actualReps != null
+                    ? set.actualReps
+                    : set.targetReps}
                 </div>
                 <div>
                   Actual:{' '}

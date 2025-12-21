@@ -57,6 +57,7 @@ function makeExerciseInstances(): ExerciseInstance[] {
       workoutId: 'w-placeholder',
       orderIndex: 0,
       sets: [],
+      workWeight: 100,
       barTypeId: 'bar-1',
       useSharedBarLoading: false,
     },

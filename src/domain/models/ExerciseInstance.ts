@@ -23,6 +23,9 @@ export interface ExerciseInstance {
    */
   sets: Set[]
 
+  /** Work weight for this exercise instance (exercise-level source of truth) */
+  workWeight: number
+
   /** Selected bar type for this exercise (persists across workouts) */
   barTypeId: string
 

@@ -64,6 +64,7 @@ export function buildWorkoutExercises(
       workoutId,
       orderIndex: index,
       sets,
+      workWeight: progression.currentWeight,
       barTypeId: DEFAULT_BAR_TYPE_ID,
       useSharedBarLoading: false,
     }

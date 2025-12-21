@@ -75,7 +75,7 @@ export async function completeActiveWorkout(
 
     const barWeight = getBarWeight(exercise.barTypeId)
     const result = calculateNextProgression(
-      progression,
+      { ...progression, currentWeight: exercise.workWeight },
       exercise.sets,
       barWeight
     )

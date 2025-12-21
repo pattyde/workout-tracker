@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { Workout } from '../domain/models/Workout'
 import { getExerciseWorkWeight } from '../domain/exercises/workWeight'
@@ -6,12 +7,17 @@ interface ActiveWorkoutViewProps {
   workout: Workout
   exerciseDefinitions: Record<string, ExerciseDefinition>
   onSetTap: (setId: string) => void
+  onWorkWeightSave: (
+    exerciseInstanceId: string,
+    workWeight: number
+  ) => void
 }
 
 export default function ActiveWorkoutView({
   workout,
   exerciseDefinitions,
   onSetTap,
+  onWorkWeightSave,
 }: ActiveWorkoutViewProps) {
   const orderedExercises = [...workout.exerciseInstances].sort(
     (a, b) => a.orderIndex - b.orderIndex
@@ -24,6 +30,7 @@ export default function ActiveWorkoutView({
       {orderedExercises.map(exercise => (
         <ExerciseCard
           key={exercise.id}
+          exerciseInstanceId={exercise.id}
           exerciseDefinitionName={
             exerciseDefinitions[exercise.exerciseDefinitionId]
               ?.name ?? 'Unknown Exercise'
@@ -35,6 +42,7 @@ export default function ActiveWorkoutView({
           workWeight={getExerciseWorkWeight(exercise)}
           sets={exercise.sets}
           onSetTap={onSetTap}
+          onWorkWeightSave={onWorkWeightSave}
         />
       ))}
     </div>
@@ -42,47 +50,131 @@ export default function ActiveWorkoutView({
 }
 
 interface ExerciseCardProps {
+  exerciseInstanceId: string
   exerciseDefinitionName: string
   sets: Workout['exerciseInstances'][number]['sets']
   unit: ExerciseDefinition['defaultUnit']
   workWeight: number | null
   onSetTap: (setId: string) => void
+  onWorkWeightSave: (
+    exerciseInstanceId: string,
+    workWeight: number
+  ) => void
 }
 
 function ExerciseCard({
+  exerciseInstanceId,
   exerciseDefinitionName,
   sets,
   unit,
   workWeight,
   onSetTap,
+  onWorkWeightSave,
 }: ExerciseCardProps) {
   const orderedSets = [...sets].sort(
     (a, b) => a.orderIndex - b.orderIndex
   )
+  const [isEditingWeight, setIsEditingWeight] =
+    useState(false)
+  const [draftWeight, setDraftWeight] = useState(
+    workWeight != null ? String(workWeight) : ''
+  )
+  const [weightError, setWeightError] = useState<
+    string | null
+  >(null)
+
+  useEffect(() => {
+    if (!isEditingWeight) {
+      setDraftWeight(
+        workWeight != null ? String(workWeight) : ''
+      )
+    }
+  }, [workWeight, isEditingWeight])
+
+  const handleSaveWeight = () => {
+    const parsed = Number(draftWeight)
+    if (!Number.isFinite(parsed)) {
+      setWeightError('Enter a valid number')
+      return
+    }
+    setWeightError(null)
+    onWorkWeightSave(exerciseInstanceId, parsed)
+    setIsEditingWeight(false)
+  }
 
   return (
     <div>
       <h3>{exerciseDefinitionName}</h3>
-      <div
-        aria-label="Work weight"
-        style={{
-          display: 'inline-block',
-          padding: '6px 10px',
-          border: '1px solid #c9c9c9',
-          borderRadius: '6px',
-          background: '#f7f7f7',
-          marginBottom: '8px',
-        }}
-      >
-        <div style={{ fontSize: '0.85rem' }}>
-          Work weight
+      {isEditingWeight ? (
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '6px 10px',
+            border: '1px solid #c9c9c9',
+            borderRadius: '6px',
+            background: '#f7f7f7',
+            marginBottom: '8px',
+          }}
+        >
+          <label>
+            Work weight
+            <div>
+              <input
+                type="number"
+                step="any"
+                value={draftWeight}
+                onChange={event =>
+                  setDraftWeight(event.target.value)
+                }
+              />{' '}
+              {unit}
+            </div>
+          </label>
+          {weightError && <div>{weightError}</div>}
+          <div>
+            <button type="button" onClick={handleSaveWeight}>
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDraftWeight(
+                  workWeight != null
+                    ? String(workWeight)
+                    : ''
+                )
+                setWeightError(null)
+                setIsEditingWeight(false)
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <div style={{ fontWeight: 600 }}>
-          {workWeight != null
-            ? `${workWeight} ${unit}`
-            : '—'}
-        </div>
-      </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsEditingWeight(true)}
+          aria-label="Edit work weight"
+          style={{
+            display: 'inline-block',
+            padding: '6px 10px',
+            border: '1px solid #c9c9c9',
+            borderRadius: '6px',
+            background: '#f7f7f7',
+            marginBottom: '8px',
+          }}
+        >
+          <div style={{ fontSize: '0.85rem' }}>
+            Work weight
+          </div>
+          <div style={{ fontWeight: 600 }}>
+            {workWeight != null
+              ? `${workWeight} ${unit}`
+              : '—'}
+          </div>
+        </button>
+      )}
       {orderedSets.map((set, index) => (
         <SetRow
           key={set.id}

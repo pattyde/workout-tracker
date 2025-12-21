@@ -22,6 +22,7 @@ import {
 import { completeActiveWorkout } from './services/workoutCompletionService'
 import { ensureProgressionSeed } from './services/progressionSeedService'
 import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
+import { updateExerciseWorkWeight } from './services/exerciseWorkWeightService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -236,6 +237,16 @@ function AppBootstrap() {
           setActiveStopwatch(
             appState?.activeStopwatch ?? null
           )
+        }}
+        onWorkWeightSave={async (exerciseInstanceId, workWeight) => {
+          if (!workout) return
+          const updated = await updateExerciseWorkWeight(
+            workout,
+            exerciseInstanceId,
+            workWeight,
+            workoutRepository
+          )
+          setWorkout(updated)
         }}
       />
       <button

@@ -107,6 +107,7 @@ describe('completeActiveWorkout', () => {
               actualReps: 5,
             }),
           ],
+          workWeight: 100,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -172,6 +173,7 @@ describe('completeActiveWorkout', () => {
           workoutId: 'w-2',
           orderIndex: 0,
           sets: [makeWorkSet({ status: 'failed', actualReps: 0 })],
+          workWeight: 80,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -231,6 +233,7 @@ describe('completeActiveWorkout', () => {
           workoutId: 'w-3',
           orderIndex: 0,
           sets: [makeWorkSet({ status: 'failed', actualReps: 0 })],
+          workWeight: 100,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -295,6 +298,7 @@ describe('completeActiveWorkout', () => {
               actualReps: 5,
             }),
           ],
+          workWeight: 100,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -309,6 +313,7 @@ describe('completeActiveWorkout', () => {
               actualReps: 0,
             }),
           ],
+          workWeight: 80,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -364,5 +369,69 @@ describe('completeActiveWorkout', () => {
     expect(squat?.failureStreak).toBe(0)
     expect(bench?.currentWeight).toBe(80)
     expect(bench?.failureStreak).toBe(1)
+  })
+
+  it('uses final work weight for progression', async () => {
+    const workoutRepo = new MemoryWorkoutRepository()
+    const progressionRepo =
+      new MemoryProgressionStateRepository()
+    const appStateRepo = new MemoryAppStateRepository()
+
+    const workout: Workout = {
+      id: 'w-5',
+      dateMs: 0,
+      exerciseInstances: [
+        {
+          id: 'ex-1',
+          exerciseDefinitionId: 'squat',
+          workoutId: 'w-5',
+          orderIndex: 0,
+          sets: [
+            makeWorkSet({
+              status: 'completed',
+              actualReps: 5,
+            }),
+          ],
+          workWeight: 80,
+          barTypeId: 'olympic-20kg',
+          useSharedBarLoading: false,
+        },
+      ],
+      variation: 'A',
+      startedAtMs: 0,
+      completed: false,
+    }
+
+    await workoutRepo.save(workout)
+    await progressionRepo.save({
+      id: 'p6',
+      exerciseDefinitionId: 'squat',
+      currentWeight: 100,
+      failureStreak: 0,
+      plateIncrement: 2.5,
+      unit: 'kg',
+    })
+    await appStateRepo.save({
+      id: 'app',
+      activeStopwatch: null,
+      unitPreference: 'kg',
+      theme: 'system',
+      activeWorkoutId: 'w-5',
+      lastCompletedVariation: undefined,
+    })
+
+    await completeActiveWorkout({
+      nowMs: 5000,
+      workoutRepository: workoutRepo,
+      progressionStateRepository: progressionRepo,
+      appStateRepository: appStateRepo,
+    })
+
+    const progression =
+      await progressionRepo.getByExerciseDefinitionId(
+        'squat'
+      )
+
+    expect(progression?.currentWeight).toBe(82.5)
   })
 })

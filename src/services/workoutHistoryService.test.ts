@@ -97,6 +97,7 @@ function makeWorkout(
         workoutId: 'w-1',
         orderIndex: 0,
         sets: [makeWorkSet()],
+        workWeight: 100,
         barTypeId: 'olympic-20kg',
         useSharedBarLoading: false,
       },
@@ -209,6 +210,7 @@ describe('workout history service', () => {
               actualReps: 0,
             }),
           ],
+          workWeight: 100,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },
@@ -241,7 +243,7 @@ describe('workout history service', () => {
       await progressionRepo.getByExerciseDefinitionId(
         'squat'
       )
-    expect(progression?.currentWeight).toBe(102.5)
+    expect(progression?.currentWeight).toBe(100)
     expect(progression?.failureStreak).toBe(1)
   })
 
@@ -270,6 +272,7 @@ describe('workout history service', () => {
               actualReps: 5,
             }),
           ],
+          workWeight: 105,
           barTypeId: 'olympic-20kg',
           useSharedBarLoading: false,
         },

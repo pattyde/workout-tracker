@@ -114,6 +114,7 @@ describe('buildWorkoutExercises', () => {
     expect(squat.sets).toHaveLength(5)
     expect(squat.sets[0]?.targetReps).toBe(5)
     expect(squat.sets[0]?.targetWeight).toBe(100)
+    expect(squat.workWeight).toBe(100)
   })
 
   it('builds variation B with correct exercises and sets', () => {
@@ -135,6 +136,7 @@ describe('buildWorkoutExercises', () => {
     expect(deadlift.sets).toHaveLength(1)
     expect(deadlift.sets[0]?.targetReps).toBe(5)
     expect(deadlift.sets[0]?.targetWeight).toBe(140)
+    expect(deadlift.workWeight).toBe(140)
   })
 
   it('sets correct reps, weights, and status for all sets', () => {

@@ -233,7 +233,7 @@ export async function updateCompletedWorkout(
 
     const barWeight = getBarWeight(exercise.barTypeId)
     const result = calculateNextProgression(
-      progression,
+      { ...progression, currentWeight: exercise.workWeight },
       sets,
       barWeight
     )
@@ -334,7 +334,7 @@ export async function softDeleteWorkout(
 
     const barWeight = getBarWeight(exercise.barTypeId)
     const result = calculateNextProgression(
-      progression,
+      { ...progression, currentWeight: exercise.workWeight },
       exercise.sets,
       barWeight
     )

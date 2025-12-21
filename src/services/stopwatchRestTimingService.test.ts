@@ -51,14 +51,15 @@ function makeWorkout(sets: Set[]): Workout {
     exerciseInstances: [
       {
         id: 'ex-1',
-        exerciseDefinitionId: 'def-1',
-        workoutId: 'workout-1',
-        orderIndex: 0,
-        sets,
-        barTypeId: 'bar-1',
-        useSharedBarLoading: false,
-      },
-    ],
+      exerciseDefinitionId: 'def-1',
+      workoutId: 'workout-1',
+      orderIndex: 0,
+      sets,
+      workWeight: 100,
+      barTypeId: 'bar-1',
+      useSharedBarLoading: false,
+    },
+  ],
     variation: 'A',
     completed: false,
   }

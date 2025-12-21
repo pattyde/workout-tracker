@@ -17,7 +17,10 @@ export interface ExerciseInstance {
   /** Explicit ordering within the workout */
   orderIndex: number
 
-  /** Array of sets for this exercise, ordered with warmups first, then work sets */
+  /**
+   * Array of sets for this exercise, ordered with warmups first, then work sets.
+   * Work-set weight is exercise-level by design; sets mirror that value.
+   */
   sets: Set[]
 
   /** Selected bar type for this exercise (persists across workouts) */

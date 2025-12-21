@@ -1,5 +1,6 @@
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { Workout } from '../domain/models/Workout'
+import { getExerciseWorkWeight } from '../domain/exercises/workWeight'
 
 interface ActiveWorkoutViewProps {
   workout: Workout
@@ -31,10 +32,7 @@ export default function ActiveWorkoutView({
             exerciseDefinitions[exercise.exerciseDefinitionId]
               ?.defaultUnit ?? 'kg'
           }
-          workWeight={
-            exercise.sets.find(set => set.type === 'work')
-              ?.targetWeight ?? null
-          }
+          workWeight={getExerciseWorkWeight(exercise)}
           sets={exercise.sets}
           onSetTap={onSetTap}
         />

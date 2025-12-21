@@ -5,6 +5,7 @@ import type { WorkoutRepository } from '../data/WorkoutRepository'
 import type { ProgressionStateRepository } from '../data/ProgressionStateRepository'
 import type { AppStateRepository } from '../data/AppStateRepository'
 import { getNextSetState } from '../domain/sets/setTap'
+import { getExerciseWorkWeight } from '../domain/exercises/workWeight'
 import {
   softDeleteWorkout,
   updateCompletedWorkout,
@@ -260,9 +261,7 @@ function WorkoutDetailsView({
         const unit =
           exerciseDefinitions[exercise.exerciseDefinitionId]
             ?.defaultUnit ?? 'kg'
-        const workWeight =
-          exercise.sets.find(set => set.type === 'work')
-            ?.targetWeight ?? null
+        const workWeight = getExerciseWorkWeight(exercise)
         const orderedSets = [...exercise.sets].sort(
           (a, b) => a.orderIndex - b.orderIndex
         )

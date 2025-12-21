@@ -14,7 +14,10 @@ export interface Set {
   /** Whether this set is enabled (warmups default to false) */
   enabled: boolean
 
-  /** Target weight for this set */
+  /**
+   * Target weight for this set.
+   * For work sets, this mirrors the exercise-level work weight.
+   */
   targetWeight: number
 
   /** Target number of repetitions */

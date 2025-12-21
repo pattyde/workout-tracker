@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ExerciseDefinition } from './domain/models/ExerciseDefinitions'
 import type { ProgressionState } from './domain/models/ProgressionState'
 import type { Workout } from './domain/models/Workout'
+import type { AppState } from './domain/models/AppState'
 import { IndexedDbWorkoutRepository } from './data/WorkoutRepositoryIndexedDb'
 import { IndexedDbAppStateRepository } from './data/AppStateRepositoryIndexedDb'
 import {
@@ -11,6 +12,7 @@ import {
 import { startOrResumeWorkout } from './services/startOrResumeWorkoutService'
 import ActiveWorkoutView from './ui/ActiveWorkoutView'
 import { applySetTapToWorkout } from './services/setTapService'
+import { StopwatchDisplay } from './ui/StopwatchDisplay'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -60,6 +62,8 @@ function AppBootstrap() {
   const [workout, setWorkout] = useState<Workout | null>(
     null
   )
+  const [activeStopwatch, setActiveStopwatch] =
+    useState<AppState['activeStopwatch']>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -78,6 +82,11 @@ function AppBootstrap() {
 
         if (!cancelled) {
           setWorkout(activeWorkout)
+          const appState =
+            await appStateRepository.get()
+          setActiveStopwatch(
+            appState?.activeStopwatch ?? null
+          )
         }
       } catch (err) {
         if (!cancelled) {
@@ -117,21 +126,31 @@ function AppBootstrap() {
   }
 
   return (
-    <ActiveWorkoutView
-      workout={workout}
-      exerciseDefinitions={exerciseDefinitions}
-      onSetTap={async setId => {
-        if (!workout) return
-        const updated = await applySetTapToWorkout(
-          workout,
-          setId,
-          workoutRepository,
-          appStateRepository,
-          Date.now()
-        )
-        setWorkout(updated)
-      }}
-    />
+    <div>
+      {activeStopwatch?.startTime != null && (
+        <StopwatchDisplay stopwatch={activeStopwatch} />
+      )}
+      <ActiveWorkoutView
+        workout={workout}
+        exerciseDefinitions={exerciseDefinitions}
+        onSetTap={async setId => {
+          if (!workout) return
+          const updated = await applySetTapToWorkout(
+            workout,
+            setId,
+            workoutRepository,
+            appStateRepository,
+            Date.now()
+          )
+          setWorkout(updated)
+          const appState =
+            await appStateRepository.get()
+          setActiveStopwatch(
+            appState?.activeStopwatch ?? null
+          )
+        }}
+      />
+    </div>
   )
 }
 

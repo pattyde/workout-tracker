@@ -146,11 +146,6 @@ export default function ProgressionIncrementScreen({
         const unit = definition?.defaultUnit ?? 'kg'
         const draft =
           drafts[progression.exerciseDefinitionId] ?? ''
-        const preferredBar =
-          getBarType(
-            progression.preferredBarTypeId ??
-              'olympic-20kg'
-          ) ?? getBarType('olympic-20kg')
         const barDraft =
           barDrafts[progression.exerciseDefinitionId] ??
           'olympic-20kg'

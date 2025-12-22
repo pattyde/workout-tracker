@@ -83,6 +83,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -106,6 +107,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -128,6 +130,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -150,6 +153,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={handleTap}
         onWorkWeightSave={() => {}}
       />
@@ -176,6 +180,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -211,6 +216,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -238,6 +244,7 @@ describe('ActiveWorkoutView', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
+        onVariationChange={() => {}}
         onSetTap={handleTap}
         onWorkWeightSave={handleSave}
       />
@@ -248,5 +255,27 @@ describe('ActiveWorkoutView', () => {
 
     expect(handleSave).not.toHaveBeenCalled()
     expect(handleTap).not.toHaveBeenCalled()
+  })
+
+  it('confirms variation switch explicitly', () => {
+    const handleChange = vi.fn()
+
+    render(
+      <ActiveWorkoutView
+        workout={WORKOUT}
+        exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
+        onVariationChange={handleChange}
+        onSetTap={() => {}}
+        onWorkWeightSave={() => {}}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Change variation'))
+    fireEvent.click(screen.getByLabelText('Variation B'))
+    fireEvent.click(screen.getByText('Confirm switch'))
+
+    expect(handleChange).toHaveBeenCalledWith('B')
   })
 })

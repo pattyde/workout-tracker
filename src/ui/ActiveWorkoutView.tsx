@@ -12,6 +12,7 @@ interface ActiveWorkoutViewProps {
   exerciseDefinitions: Record<string, ExerciseDefinition>
   progressionStates: Record<string, ProgressionState>
   equipmentInventory: EquipmentInventory
+  onVariationChange: (variation: Workout['variation']) => void
   onSetTap: (setId: string) => void
   onWorkWeightSave: (
     exerciseInstanceId: string,
@@ -24,6 +25,7 @@ export default function ActiveWorkoutView({
   exerciseDefinitions,
   progressionStates,
   equipmentInventory,
+  onVariationChange,
   onSetTap,
   onWorkWeightSave,
 }: ActiveWorkoutViewProps) {
@@ -34,7 +36,10 @@ export default function ActiveWorkoutView({
   return (
     <div>
       <h1>Workout Tracker</h1>
-      <h2>Variation {workout.variation}</h2>
+      <VariationHeader
+        currentVariation={workout.variation}
+        onConfirmChange={onVariationChange}
+      />
       {orderedExercises.map(exercise => (
         <ExerciseCard
           key={exercise.id}
@@ -255,6 +260,89 @@ function SetRow({
       <div>Reps: {repsDisplay}</div>
       <div>Status: {status}</div>
     </button>
+  )
+}
+
+interface VariationHeaderProps {
+  currentVariation: Workout['variation']
+  onConfirmChange: (variation: Workout['variation']) => void
+}
+
+function VariationHeader({
+  currentVariation,
+  onConfirmChange,
+}: VariationHeaderProps) {
+  const [isChanging, setIsChanging] = useState(false)
+  const [selected, setSelected] =
+    useState<Workout['variation']>(currentVariation)
+
+  useEffect(() => {
+    if (!isChanging) {
+      setSelected(currentVariation)
+    }
+  }, [currentVariation, isChanging])
+
+  return (
+    <div>
+      <h2>Variation {currentVariation}</h2>
+      <button
+        type="button"
+        onClick={() => setIsChanging(true)}
+      >
+        Change variation
+      </button>
+      {isChanging && (
+        <div
+          style={{
+            border: '1px solid #d4d4d4',
+            padding: '10px',
+            marginBottom: '12px',
+          }}
+        >
+          <div>
+            <strong>Switch variation</strong>
+          </div>
+          <label>
+            <input
+              type="radio"
+              name="variation"
+              value="A"
+              checked={selected === 'A'}
+              onChange={() => setSelected('A')}
+            />{' '}
+            Variation A
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="variation"
+              value="B"
+              checked={selected === 'B'}
+              onChange={() => setSelected('B')}
+            />{' '}
+            Variation B
+          </label>
+          <div>
+            This will replace the current workout exercises.
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              onConfirmChange(selected)
+              setIsChanging(false)
+            }}
+          >
+            Confirm switch
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsChanging(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

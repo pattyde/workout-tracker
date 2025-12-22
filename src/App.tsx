@@ -30,6 +30,7 @@ import ProgressionIncrementScreen from './ui/ProgressionIncrementScreen'
 import { getOrInitAppState } from './services/appStateService'
 import { getActiveWorkout } from './services/workoutLifecycleService'
 import HomeScreen from './ui/HomeScreen'
+import { switchActiveWorkoutVariation } from './services/workoutVariationService'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -310,6 +311,19 @@ function AppBootstrap() {
         equipmentInventory={
           equipmentInventory ?? { bars: [], plates: [] }
         }
+        onVariationChange={async variation => {
+          if (!workout) return
+          const updated = await switchActiveWorkoutVariation(
+            {
+              variation,
+              exerciseDefinitions,
+              progressionStates,
+              workoutRepository,
+              appStateRepository,
+            }
+          )
+          setWorkout(updated)
+        }}
         onSetTap={async setId => {
           if (!workout) return
           const updated = await applySetTapToWorkout(

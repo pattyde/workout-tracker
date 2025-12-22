@@ -212,6 +212,7 @@ function ExerciseCard({
             <div>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 value={draftWeight}
                 onChange={event =>
@@ -447,6 +448,28 @@ function PlateCalculatorPanel({
         })
       : null
 
+  const plateStacks = calculation?.stack.platesPerSide ?? []
+  const perSideSummary = plateStacks
+    .map(plate => `${plate.weight} × ${plate.count}`)
+    .join(', ')
+  const hasPlates = plateStacks.length > 0
+
+  function getPlateWidth(weight: number): number {
+    const maxWeight =
+      plateStacks[0]?.weight ?? weight
+    if (maxWeight <= 0) return 48
+    const scale = weight / maxWeight
+    return Math.max(26, Math.round(68 * scale))
+  }
+
+  function getPlateColor(weight: number): string {
+    if (weight >= 20) return '#4b5563'
+    if (weight >= 15) return '#6b7280'
+    if (weight >= 10) return '#7f8896'
+    if (weight >= 5) return '#9aa1ac'
+    return '#b3bac5'
+  }
+
   return (
     <div
       role="dialog"
@@ -457,50 +480,134 @@ function PlateCalculatorPanel({
         marginBottom: '12px',
         borderRadius: '10px',
         background: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
       }}
     >
-      <div>
-        <strong>Plate calculator</strong>
-      </div>
-      <div>
-        Bar: {barName} ({barWeight} {unit})
+      <div style={{ fontWeight: 700 }}>Plate Calculator</div>
+      <div style={{ fontSize: '0.9rem', color: '#555' }}>
+        {barName} ({barWeight} {unit})
       </div>
       {workWeight == null ? (
         <div>No work weight set.</div>
       ) : (
-        <div>
-          <div>
-            Target: {workWeight} {unit}
+        <>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              fontSize: '0.9rem',
+              color: '#444',
+            }}
+          >
+            <div>
+              Target: {workWeight} {unit}
+            </div>
+            <div>
+              Achieved: {calculation?.stack.totalWeight} {unit}
+            </div>
           </div>
-          <div>
-            Achieved: {calculation?.stack.totalWeight} {unit}
+          <div
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '10px',
+              padding: '8px',
+              background: '#f9fafb',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                minHeight: '52px',
+              }}
+            >
+              <div
+                aria-hidden="true"
+                style={{
+                  width: '40px',
+                  height: '12px',
+                  borderRadius: '6px',
+                  background: '#6b7280',
+                }}
+              />
+              {hasPlates ? (
+                plateStacks.map(plate => {
+                  const width = getPlateWidth(plate.weight)
+                  return (
+                    <div
+                      key={plate.weight}
+                      style={{
+                        display: 'flex',
+                        gap: '3px',
+                      }}
+                    >
+                      {Array.from({ length: plate.count }).map(
+                        (_, idx) => (
+                          <div
+                            key={`${plate.weight}-${idx}`}
+                            style={{
+                              width: `${width}px`,
+                              height: '40px',
+                              borderRadius: '6px',
+                              background: getPlateColor(
+                                plate.weight
+                              ),
+                              color: '#f9fafb',
+                              fontSize: '0.7rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {plate.weight}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )
+                })
+              ) : (
+                <div style={{ color: '#6b7280' }}>
+                  Bar only
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                marginTop: '6px',
+                fontSize: '0.8rem',
+                color: '#6b7280',
+              }}
+            >
+              Diagram shows one side only
+            </div>
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+            Per side:{' '}
+            {perSideSummary.length > 0
+              ? perSideSummary.replace(/, /g, ' · ')
+              : `None`}
           </div>
           {calculation && calculation.rounded && (
-            <div role="alert">
+            <div role="alert" style={{ color: '#7c2d12' }}>
               Target weight cannot be loaded exactly with your
-              available plates.
-              <div>
-                Difference: {Math.abs(calculation.delta)} {unit}
-              </div>
+              available plates. Difference:{' '}
+              {Math.abs(calculation.delta)} {unit}
             </div>
           )}
-          <div>Plates per side:</div>
-          {calculation?.stack.platesPerSide.length ? (
-            <ul>
-              {calculation.stack.platesPerSide.map(plate => (
-                <li key={plate.weight}>
-                  {plate.count} × {plate.weight} {unit}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div>None</div>
-          )}
-        </div>
+        </>
       )}
-      <button type="button" onClick={onClose}>
+      <Button
+        variant="secondary"
+        onClick={onClose}
+        style={{ width: '100%' }}
+      >
         Close
-      </button>
+      </Button>
     </div>
   )
 }

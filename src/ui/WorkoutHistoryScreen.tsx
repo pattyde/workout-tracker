@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Workout } from '../domain/models/Workout'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { WorkoutRepository } from '../data/WorkoutRepository'
@@ -10,12 +10,14 @@ import {
   softDeleteWorkout,
   updateCompletedWorkout,
 } from '../services/workoutHistoryService'
+import Button from './Button'
 
 interface WorkoutHistoryScreenProps {
   workoutRepository: WorkoutRepository
   exerciseDefinitions: Record<string, ExerciseDefinition>
   progressionStateRepository: ProgressionStateRepository
   appStateRepository: AppStateRepository
+  onBack: () => void
 }
 
 export default function WorkoutHistoryScreen({
@@ -23,6 +25,7 @@ export default function WorkoutHistoryScreen({
   exerciseDefinitions,
   progressionStateRepository,
   appStateRepository,
+  onBack,
 }: WorkoutHistoryScreenProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -94,6 +97,16 @@ export default function WorkoutHistoryScreen({
           setDraftWorkout(null)
           setIsEditing(false)
         }}
+        onWorkWeightChange={(exerciseInstanceId, workWeight) => {
+          if (!draftWorkout) return
+          setDraftWorkout(
+            updateWorkWeightInWorkout(
+              draftWorkout,
+              exerciseInstanceId,
+              workWeight
+            )
+          )
+        }}
         onSetTap={setId => {
           if (!draftWorkout) return
           setDraftWorkout(
@@ -157,16 +170,52 @@ export default function WorkoutHistoryScreen({
   }
 
   if (workouts.length === 0) {
-    return <div>No completed workouts yet</div>
+    return (
+      <div
+        style={{
+          padding: '16px',
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
+      >
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          style={{ width: '100%', marginBottom: '16px' }}
+        >
+          Back
+        </Button>
+        <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>
+          No completed workouts yet
+        </div>
+        <div style={{ color: '#555', marginTop: '6px' }}>
+          Start a workout to see your history here.
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div>
-      <h2>Workout History</h2>
+    <div
+      style={{
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        paddingBottom: '32px',
+        maxWidth: '600px',
+        margin: '0 auto',
+      }}
+    >
+      <Button variant="secondary" onClick={onBack} style={{ width: '100%' }}>
+        Back
+      </Button>
+      <h2 style={{ margin: 0 }}>Workout History</h2>
       {workouts.map(workout => (
-      <WorkoutSummaryRow
+        <WorkoutSummaryRow
           key={workout.id}
           workout={workout}
+          exerciseDefinitions={exerciseDefinitions}
           onSelect={() => setSelectedWorkout(workout)}
         />
       ))}
@@ -176,25 +225,110 @@ export default function WorkoutHistoryScreen({
 
 interface WorkoutSummaryRowProps {
   workout: Workout
+  exerciseDefinitions: Record<string, ExerciseDefinition>
   onSelect: () => void
 }
 
 function WorkoutSummaryRow({
   workout,
+  exerciseDefinitions,
   onSelect,
 }: WorkoutSummaryRowProps) {
   const completedAt = workout.completedAtMs
-    ? new Date(workout.completedAtMs).toLocaleString()
+    ? formatWorkoutDate(workout.completedAtMs)
     : 'Unknown date'
-  const exerciseCount = workout.exerciseInstances.length
 
   return (
-    <button type="button" onClick={onSelect}>
-      <div>{completedAt}</div>
-      <div>Variation {workout.variation}</div>
-      <div>{exerciseCount} exercises</div>
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-label={`Workout ${workout.variation} on ${completedAt}`}
+      style={{
+        border: '1px solid #d6d6d6',
+        borderRadius: '12px',
+        padding: '16px',
+        background: '#f9f9f9',
+        textAlign: 'left',
+        minHeight: '72px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '12px',
+          fontSize: '0.9rem',
+          color: '#666',
+        }}
+      >
+        <div>{`Workout ${workout.variation}`}</div>
+        <div>{completedAt}</div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {workout.exerciseInstances.map((exercise, index) => {
+          const definition =
+            exerciseDefinitions[exercise.exerciseDefinitionId]
+          const name = definition?.name ?? 'Unknown Exercise'
+          const unit = definition?.defaultUnit ?? 'kg'
+          const scheme = getSetScheme(exercise.sets)
+          const weight =
+            getExerciseWorkWeight(exercise) ??
+            exercise.sets[0]?.targetWeight
+          return (
+            <div
+              key={exercise.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: index === 0 ? 0 : '8px',
+                marginTop: index === 0 ? 0 : '8px',
+                borderTop:
+                  index === 0 ? 'none' : '1px solid #e5e7eb',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>{name}</div>
+              <div style={{ color: '#555' }}>
+                {scheme}{' '}
+                {weight != null ? `${weight} ${unit}` : '—'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </button>
   )
+}
+
+function getSetScheme(sets: Workout['exerciseInstances'][number]['sets']): string {
+  const setCount = sets.length
+  const reps = sets[0]?.targetReps ?? 0
+  return `${setCount}×${reps}`
+}
+
+function formatWorkoutDate(timestampMs: number): string {
+  const date = new Date(timestampMs)
+  const today = new Date()
+  const isToday =
+    date.toDateString() === today.toDateString()
+
+  if (isToday) {
+    return `Today, ${date.toLocaleDateString(undefined, {
+      day: 'numeric',
+      month: 'short',
+    })}`
+  }
+
+  return date.toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 interface WorkoutDetailsViewProps {
@@ -206,6 +340,10 @@ interface WorkoutDetailsViewProps {
   onSave: () => void
   onDelete: () => void
   onSetTap: (setId: string) => void
+  onWorkWeightChange: (
+    exerciseInstanceId: string,
+    workWeight: number
+  ) => void
   isEditing: boolean
 }
 
@@ -218,6 +356,7 @@ function WorkoutDetailsView({
   onSave,
   onDelete,
   onSetTap,
+  onWorkWeightChange,
   isEditing,
 }: WorkoutDetailsViewProps) {
   const completedAt = workout.completedAtMs
@@ -226,34 +365,101 @@ function WorkoutDetailsView({
   const orderedExercises = [...workout.exerciseInstances].sort(
     (a, b) => a.orderIndex - b.orderIndex
   )
+  const [editingExerciseId, setEditingExerciseId] =
+    useState<string | null>(null)
+  const [draftWorkWeight, setDraftWorkWeight] = useState('')
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (!editingExerciseId) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [editingExerciseId])
+
+  useEffect(() => {
+    if (!editingExerciseId) return
+    const input = inputRef.current
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  }, [editingExerciseId])
+
+  useEffect(() => {
+    if (!isEditing) {
+      setEditingExerciseId(null)
+      setDraftWorkWeight('')
+    }
+  }, [isEditing])
 
   return (
-    <div>
-      <button type="button" onClick={onBack}>
-        Back
-      </button>
-      {isEditing ? (
-        <div>
-          <button type="button" onClick={onSave}>
-            Save changes
-          </button>
-          <button type="button" onClick={onCancelEdit}>
-            Cancel
-          </button>
+    <div
+      style={{
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        paddingBottom: '32px',
+        maxWidth: '600px',
+        margin: '0 auto',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          style={{ width: '100%' }}
+        >
+          Back
+        </Button>
+      </div>
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+          }}
+        >
+          <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>
+            Workout {workout.variation}
+          </div>
+          {!isEditing && (
+            <Button
+              variant="secondary"
+              onClick={onEdit}
+              aria-label="Edit workout"
+              style={{
+                minHeight: '48px',
+                padding: '0 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '1rem',
+                lineHeight: 1,
+              }}
+            >
+              <span aria-hidden="true">✎</span>
+              Edit Workout
+            </Button>
+          )}
         </div>
-      ) : (
-        <div>
-          <button type="button" onClick={onEdit}>
-            Edit
-          </button>
-          <button type="button" onClick={onDelete}>
-            Delete workout
-          </button>
+        <div style={{ color: '#666', marginTop: '4px' }}>
+          {completedAt}
         </div>
-      )}
-      <h2>Workout Details</h2>
-      <div>{completedAt}</div>
-      <div>Variation {workout.variation}</div>
+      </div>
       {orderedExercises.map(exercise => {
         const name =
           exerciseDefinitions[exercise.exerciseDefinitionId]
@@ -267,54 +473,232 @@ function WorkoutDetailsView({
         )
 
         return (
-          <div key={exercise.id}>
-            <h3>{name}</h3>
+          <div
+            key={exercise.id}
+            style={{
+              border: '1px solid #d6d6d6',
+              borderRadius: '12px',
+              padding: '12px',
+              background: '#f9f9f9',
+            }}
+          >
             <div
-              aria-label="Work weight"
               style={{
-                display: 'inline-block',
-                padding: '6px 10px',
-                border: '1px solid #c9c9c9',
-                borderRadius: '6px',
-                background: '#f7f7f7',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '12px',
                 marginBottom: '8px',
               }}
             >
-              <div style={{ fontSize: '0.85rem' }}>
-                Work weight
-              </div>
-              <div style={{ fontWeight: 600 }}>
-                {workWeight != null
-                  ? `${workWeight} ${unit}`
-                  : '—'}
-              </div>
-            </div>
-            {orderedSets.map((set, index) => (
-              <button
-                key={set.id}
-                type="button"
-                onClick={() => onSetTap(set.id)}
-                disabled={!isEditing}
-              >
-                <div>Set {index + 1}</div>
-                <div>
-                  Reps:{' '}
-                  {set.actualReps != null
-                    ? set.actualReps
-                    : set.targetReps}
-                </div>
-                <div>
-                  Actual:{' '}
-                  {set.actualReps != null
-                    ? set.actualReps
+              <h3 style={{ margin: 0 }}>{name}</h3>
+              {isEditing ? (
+                <button
+                  type="button"
+                  aria-label="Edit work weight"
+                  onClick={() => {
+                    setEditingExerciseId(exercise.id)
+                    setDraftWorkWeight(
+                      workWeight != null ? String(workWeight) : ''
+                    )
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #c9c9c9',
+                    borderRadius: '10px',
+                    background: '#ffffff',
+                    minHeight: '44px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontWeight: 600,
+                  }}
+                >
+                  {workWeight != null
+                    ? `${workWeight} ${unit}`
+                    : '—'}
+                </button>
+              ) : (
+                <div
+                  aria-label="Work weight"
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #c9c9c9',
+                    borderRadius: '10px',
+                    background: '#ffffff',
+                    minHeight: '44px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontWeight: 600,
+                  }}
+                >
+                  {workWeight != null
+                    ? `${workWeight} ${unit}`
                     : '—'}
                 </div>
-                <div>Status: {set.status}</div>
-              </button>
-            ))}
+              )}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+                flexWrap: 'nowrap',
+              }}
+            >
+              {orderedSets.map((set, index) => (
+                <WorkoutDetailsSetTile
+                  key={set.id}
+                  index={index}
+                  targetReps={set.targetReps}
+                  status={set.status}
+                  actualReps={set.actualReps}
+                  isEditing={isEditing}
+                  onTap={() => onSetTap(set.id)}
+                />
+              ))}
+            </div>
           </div>
         )
       })}
+      {isEditing ? (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            variant="primary"
+            onClick={onSave}
+            style={{ width: '100%' }}
+          >
+            Save changes
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onCancelEdit}
+            style={{ width: '100%' }}
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="danger"
+          onClick={onDelete}
+          style={{ width: '100%' }}
+        >
+          Delete workout
+        </Button>
+      )}
+      {isEditing && editingExerciseId && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 30,
+            }}
+            aria-hidden="true"
+            onClick={() => {
+              setEditingExerciseId(null)
+              setDraftWorkWeight('')
+            }}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="history-work-weight-editor"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              zIndex: 31,
+            }}
+          >
+            <div
+              style={{
+                border: '1px solid #d4d4d4',
+                borderRadius: '12px',
+                background: '#f9f9f9',
+                padding: '12px',
+                width: '100%',
+                maxWidth: '420px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <div
+                id="history-work-weight-editor"
+                style={{ fontWeight: 700 }}
+              >
+                Edit work weight
+              </div>
+              <label>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '8px',
+                  }}
+                >
+                  <input
+                    ref={inputRef}
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    value={draftWorkWeight}
+                    onChange={event =>
+                      setDraftWorkWeight(event.target.value)
+                    }
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      padding: '8px 10px',
+                      borderRadius: '10px',
+                      border: '1px solid #cbd5f6',
+                      minHeight: '48px',
+                      width: '100%',
+                    }}
+                  />
+                  <span
+                    style={{ color: '#666', fontSize: '1rem' }}
+                  >
+                    {exerciseDefinitions[
+                      workout.exerciseInstances.find(
+                        exercise =>
+                          exercise.id === editingExerciseId
+                      )?.exerciseDefinitionId ?? ''
+                    ]?.defaultUnit ?? 'kg'}
+                  </span>
+                </div>
+              </label>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const next = Number(draftWorkWeight)
+                  if (!Number.isFinite(next)) return
+                  onWorkWeightChange(editingExerciseId, next)
+                  setEditingExerciseId(null)
+                  setDraftWorkWeight('')
+                }}
+                style={{ width: '100%', minHeight: '48px' }}
+              >
+                Save
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setEditingExerciseId(null)
+                  setDraftWorkWeight('')
+                }}
+                style={{ width: '100%', minHeight: '48px' }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -343,4 +727,117 @@ function updateSetInWorkout(
     ...workout,
     exerciseInstances,
   }
+}
+
+function updateWorkWeightInWorkout(
+  workout: Workout,
+  exerciseInstanceId: string,
+  workWeight: number
+): Workout {
+  const exerciseInstances = workout.exerciseInstances.map(
+    exercise => {
+      if (exercise.id !== exerciseInstanceId) {
+        return exercise
+      }
+      return {
+        ...exercise,
+        workWeight,
+      }
+    }
+  )
+
+  return {
+    ...workout,
+    exerciseInstances,
+  }
+}
+
+interface WorkoutDetailsSetTileProps {
+  index: number
+  targetReps: number
+  status: Workout['exerciseInstances'][number]['sets'][number]['status']
+  actualReps?: number
+  isEditing: boolean
+  onTap: () => void
+}
+
+function WorkoutDetailsSetTile({
+  index,
+  targetReps,
+  status,
+  actualReps,
+  isEditing,
+  onTap,
+}: WorkoutDetailsSetTileProps) {
+  const repsDisplay =
+    status === 'pending'
+      ? targetReps
+      : actualReps ?? targetReps
+  const isPending = status === 'pending'
+
+  if (!isEditing) {
+    return (
+      <div
+        aria-label={`Set ${index + 1}`}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '8px 6px',
+          borderRadius: '10px',
+          border: isPending
+            ? '1px dashed #cfcfcf'
+            : '1px solid #e2e2e2',
+          background: isPending ? '#f6f6f6' : '#ffffff',
+          minHeight: '52px',
+          flex: '1 1 0',
+          minWidth: 0,
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.05rem',
+            fontWeight: isPending ? 500 : 700,
+            color: isPending ? '#888' : '#111',
+            opacity: isPending ? 0.7 : 1,
+          }}
+        >
+          {repsDisplay}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      aria-label={`Set ${index + 1}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '8px 6px',
+        borderRadius: '10px',
+        border: isPending
+          ? '1px dashed #cfcfcf'
+          : '1px solid #e2e2e2',
+        background: isPending ? '#f6f6f6' : '#ffffff',
+        minHeight: '52px',
+        flex: '1 1 0',
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          fontSize: '1.05rem',
+          fontWeight: isPending ? 500 : 700,
+          color: isPending ? '#888' : '#111',
+          opacity: isPending ? 0.7 : 1,
+        }}
+      >
+        {repsDisplay}
+      </div>
+    </button>
+  )
 }

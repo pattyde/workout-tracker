@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { ProgressionState } from '../domain/models/ProgressionState'
 import type {
@@ -19,6 +19,7 @@ interface ProgressionIncrementScreenProps {
   progressionStateRepository: ProgressionStateRepository
   appStateRepository: AppStateRepository
   onBack: () => void
+  onSaveSuccess?: (progressions: ProgressionState[]) => void
 }
 
 export default function ProgressionIncrementScreen({
@@ -26,6 +27,7 @@ export default function ProgressionIncrementScreen({
   progressionStateRepository,
   appStateRepository,
   onBack,
+  onSaveSuccess,
 }: ProgressionIncrementScreenProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,6 +47,9 @@ export default function ProgressionIncrementScreen({
   const [equipmentPlateDrafts, setEquipmentPlateDrafts] =
     useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [showSaveConfirmation, setShowSaveConfirmation] =
+    useState(false)
+  const saveTimerRef = useRef<number | null>(null)
 
   function getPlateKey(plate: EquipmentInventoryPlate) {
     return `${plate.weight}-${plate.unit}`
@@ -109,6 +114,10 @@ export default function ProgressionIncrementScreen({
 
     return () => {
       cancelled = true
+      if (saveTimerRef.current != null) {
+        window.clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
     }
   }, [progressionStateRepository, appStateRepository])
 
@@ -160,37 +169,52 @@ export default function ProgressionIncrementScreen({
               gap: '12px',
             }}
           >
-            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+            <div style={{ fontSize: '1.05rem', fontWeight: 600 }}>
               {name}
             </div>
-            <label>
-              Preferred bar
-              <div>
-                <select
-                  value={barDraft}
-                  onChange={event => {
-                    const selected = event.target.value
-                    setBarDrafts(current => ({
-                      ...current,
-                      [progression.exerciseDefinitionId]:
-                        selected,
-                    }))
-                  }}
-                  style={{ minHeight: '48px', width: '100%' }}
-                >
-                  {listBarTypes().map(bar => (
-                    <option key={bar.id} value={bar.id}>
-                      {bar.name} ({bar.weight} {bar.unit})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#555' }}>
+                Preferred bar
+              </span>
+              <select
+                value={barDraft}
+                onChange={event => {
+                  const selected = event.target.value
+                  setBarDrafts(current => ({
+                    ...current,
+                    [progression.exerciseDefinitionId]: selected,
+                  }))
+                }}
+                style={{
+                  minHeight: '48px',
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #d1d5db',
+                  background: '#ffffff',
+                }}
+              >
+                {listBarTypes().map(bar => (
+                  <option key={bar.id} value={bar.id}>
+                    {bar.name} ({bar.weight} {bar.unit})
+                  </option>
+                ))}
+              </select>
             </label>
-            <label>
-              Progression increment
-              <div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#555' }}>
+                Progression increment
+              </span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
                 <input
                   type="number"
+                  inputMode="decimal"
                   min="0"
                   step="any"
                   value={draft}
@@ -201,11 +225,19 @@ export default function ProgressionIncrementScreen({
                         event.target.value,
                     }))
                   }
-                  style={{ minHeight: '48px', width: '100%' }}
+                  style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    minHeight: '48px',
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid #d1d5db',
+                  }}
                 />
-              </div>
-              <div style={{ fontSize: '0.85rem', color: '#555' }}>
-                Unit: {unit}
+                <span style={{ color: '#666', fontSize: '0.95rem' }}>
+                  {unit}
+                </span>
               </div>
             </label>
           </div>
@@ -234,7 +266,27 @@ export default function ProgressionIncrementScreen({
           {equipmentInventory.bars.map(bar => {
             const enabled = equipmentBarDrafts[bar.id] ?? false
             return (
-              <label key={bar.id}>
+              <label
+                key={bar.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: '1px solid #e5e7eb',
+                  background: '#ffffff',
+                  marginTop: '6px',
+                  minHeight: '48px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600 }}>{bar.name}</div>
+                  <div style={{ color: '#666', fontSize: '0.9rem' }}>
+                    {bar.weight} {bar.unit}
+                  </div>
+                </div>
                 <input
                   type="checkbox"
                   checked={enabled}
@@ -245,8 +297,12 @@ export default function ProgressionIncrementScreen({
                       [bar.id]: checked,
                     }))
                   }}
-                />{' '}
-                {bar.name} ({bar.weight} {bar.unit})
+                  aria-label={`${bar.name} ${bar.weight} ${bar.unit}`}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                  }}
+                />
               </label>
             )
           })}
@@ -408,6 +464,15 @@ export default function ProgressionIncrementScreen({
             const refreshed =
               await progressionStateRepository.listAll()
             setProgressions(refreshed)
+            onSaveSuccess?.(refreshed)
+            setShowSaveConfirmation(true)
+            if (saveTimerRef.current != null) {
+              window.clearTimeout(saveTimerRef.current)
+            }
+            saveTimerRef.current = window.setTimeout(() => {
+              setShowSaveConfirmation(false)
+              saveTimerRef.current = null
+            }, 2000)
           } catch (err) {
             const message =
               err instanceof Error ? err.message : 'Unknown error'
@@ -421,6 +486,11 @@ export default function ProgressionIncrementScreen({
       >
         {saving ? 'Saving...' : 'Save'}
       </Button>
+      {showSaveConfirmation && !saving && (
+        <div style={{ color: '#166534', fontSize: '0.9rem' }}>
+          Settings saved
+        </div>
+      )}
     </div>
   )
 }

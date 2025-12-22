@@ -79,12 +79,19 @@ describe('WorkoutHistoryScreen', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStateRepository={progressionRepo}
         appStateRepository={appStateRepo}
+        onBack={() => {}}
       />
     )
 
     expect(
       await screen.findByText('No completed workouts yet')
     ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Start a workout to see your history here.'
+      )
+    ).toBeInTheDocument()
+    expect(screen.getByText('Back')).toBeInTheDocument()
   })
 
   it('renders completed workouts list', async () => {
@@ -92,7 +99,29 @@ describe('WorkoutHistoryScreen', () => {
       {
         id: 'w-1',
         dateMs: 0,
-        exerciseInstances: [],
+        exerciseInstances: [
+          {
+            id: 'ex-1',
+            exerciseDefinitionId: 'squat',
+            workoutId: 'w-1',
+            orderIndex: 0,
+            sets: [
+              {
+                id: 'set-1',
+                orderIndex: 0,
+                type: 'work',
+                enabled: true,
+                targetWeight: 60,
+                targetReps: 5,
+                status: 'completed',
+                actualReps: 5,
+              },
+            ],
+            workWeight: 60,
+            barTypeId: 'olympic-20kg',
+            useSharedBarLoading: false,
+          },
+        ],
         variation: 'A',
         startedAtMs: 0,
         completedAtMs: 1000,
@@ -119,14 +148,17 @@ describe('WorkoutHistoryScreen', () => {
         exerciseDefinitions={DEFINITIONS}
         progressionStateRepository={progressionRepo}
         appStateRepository={appStateRepo}
+        onBack={() => {}}
       />
     )
 
     expect(
-      await screen.findByText('Variation A')
+      await screen.findByText('Workout A')
     ).toBeInTheDocument()
+    expect(screen.getByText('Squat')).toBeInTheDocument()
+    expect(screen.getByText('1×5 60 kg')).toBeInTheDocument()
     expect(
-      screen.queryByText('Variation B')
+      screen.queryByText('Workout B')
     ).toBeNull()
   })
 })

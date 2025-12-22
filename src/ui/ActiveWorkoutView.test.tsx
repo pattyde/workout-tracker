@@ -89,7 +89,7 @@ describe('ActiveWorkoutView', () => {
       />
     )
 
-    expect(screen.getByText('Variation A')).toBeInTheDocument()
+    expect(screen.getByText('Workout A')).toBeInTheDocument()
     expect(screen.getByText('Squat')).toBeInTheDocument()
     expect(screen.getByText('20 kg')).toBeInTheDocument()
     expect(screen.getByLabelText('Set 1')).toBeInTheDocument()
@@ -281,9 +281,9 @@ describe('ActiveWorkoutView', () => {
       />
     )
 
-    fireEvent.click(screen.getByText('Change variation'))
-    fireEvent.click(screen.getByLabelText('Variation B'))
-    fireEvent.click(screen.getByText('Confirm switch'))
+    fireEvent.click(screen.getByLabelText('Edit workout'))
+    fireEvent.click(screen.getByLabelText('Workout B'))
+    fireEvent.click(screen.getByText('Confirm Switch'))
 
     expect(handleChange).toHaveBeenCalledWith('B')
   })

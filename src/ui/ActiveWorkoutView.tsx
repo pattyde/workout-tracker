@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { Workout } from '../domain/models/Workout'
 import { getBarType } from '../domain/bars/barTypes'
@@ -46,13 +46,10 @@ export default function ActiveWorkoutView({
         margin: '0 auto',
       }}
     >
-      <div>
-        <h1 style={{ margin: 0 }}>Workout Tracker</h1>
-        <VariationHeader
-          currentVariation={workout.variation}
-          onConfirmChange={onVariationChange}
-        />
-      </div>
+      <VariationHeader
+        currentVariation={workout.variation}
+        onConfirmChange={onVariationChange}
+      />
       {orderedExercises.map(exercise => (
         <ExerciseCard
           key={exercise.id}
@@ -119,6 +116,8 @@ function ExerciseCard({
   >(null)
   const [showCalculator, setShowCalculator] =
     useState(false)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const editorId = `work-weight-editor-${exerciseInstanceId}`
 
   useEffect(() => {
     if (!isEditingWeight) {
@@ -127,6 +126,24 @@ function ExerciseCard({
       )
     }
   }, [workWeight, isEditingWeight])
+
+  useEffect(() => {
+    if (!isEditingWeight) return
+    const input = inputRef.current
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  }, [isEditingWeight])
+
+  useEffect(() => {
+    if (!isEditingWeight) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isEditingWeight])
 
   const handleSaveWeight = () => {
     const parsed = Number(draftWeight)
@@ -198,51 +215,104 @@ function ExerciseCard({
         )}
       </div>
       {isEditingWeight ? (
-        <div
-          style={{
-            padding: '10px',
-            border: '1px solid #c9c9c9',
-            borderRadius: '10px',
-            background: '#ffffff',
-            marginBottom: '12px',
-          }}
-        >
-          <label>
-            Work weight
-            <div>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="any"
-                value={draftWeight}
-                onChange={event =>
-                  setDraftWeight(event.target.value)
-                }
-              />{' '}
-              {unit}
-            </div>
-          </label>
-          {weightError && <div>{weightError}</div>}
-          <div>
-            <button type="button" onClick={handleSaveWeight}>
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDraftWeight(
-                  workWeight != null
-                    ? String(workWeight)
-                    : ''
-                )
-                setWeightError(null)
-                setIsEditingWeight(false)
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 30,
+            }}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={editorId}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              zIndex: 31,
+            }}
+          >
+            <div
+              style={{
+                border: '1px solid #d4d4d4',
+                borderRadius: '12px',
+                background: '#f9f9f9',
+                padding: '12px',
+                width: '100%',
+                maxWidth: '420px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
               }}
             >
-              Cancel
-            </button>
+              <div id={editorId} style={{ fontWeight: 700 }}>
+                Edit work weight
+              </div>
+              <label>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '8px',
+                  }}
+                >
+                  <input
+                    ref={inputRef}
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    value={draftWeight}
+                    onChange={event =>
+                      setDraftWeight(event.target.value)
+                    }
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      padding: '8px 10px',
+                      borderRadius: '10px',
+                      border: '1px solid #cbd5f6',
+                      minHeight: '48px',
+                      width: '100%',
+                    }}
+                  />
+                  <span
+                    style={{ color: '#666', fontSize: '1rem' }}
+                  >
+                    {unit}
+                  </span>
+                </div>
+              </label>
+              {weightError && <div>{weightError}</div>}
+              <Button
+                variant="primary"
+                onClick={handleSaveWeight}
+                style={{ width: '100%', minHeight: '48px' }}
+              >
+                Save
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setDraftWeight(
+                    workWeight != null ? String(workWeight) : ''
+                  )
+                  setWeightError(null)
+                  setIsEditingWeight(false)
+                }}
+                style={{ width: '100%', minHeight: '48px' }}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         <div />
       )}
@@ -344,6 +414,7 @@ function VariationHeader({
   const [isChanging, setIsChanging] = useState(false)
   const [selected, setSelected] =
     useState<Workout['variation']>(currentVariation)
+  const panelId = 'variation-switcher-panel'
 
   useEffect(() => {
     if (!isChanging) {
@@ -351,62 +422,180 @@ function VariationHeader({
     }
   }, [currentVariation, isChanging])
 
+  useEffect(() => {
+    if (!isChanging) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isChanging])
+
   return (
     <div>
-      <h2>Variation {currentVariation}</h2>
-      <Button variant="secondary" onClick={() => setIsChanging(true)}>
-        Change variation
-      </Button>
-      {isChanging && (
-        <div
-          style={{
-            border: '1px solid #d4d4d4',
-            padding: '10px',
-            marginBottom: '12px',
-          }}
-        >
-          <div>
-            <strong>Switch variation</strong>
-          </div>
-          <label>
-            <input
-              type="radio"
-              name="variation"
-              value="A"
-              checked={selected === 'A'}
-              onChange={() => setSelected('A')}
-            />{' '}
-            Variation A
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="variation"
-              value="B"
-              checked={selected === 'B'}
-              onChange={() => setSelected('B')}
-            />{' '}
-            Variation B
-          </label>
-          <div>
-            This will replace the current workout exercises.
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              onConfirmChange(selected)
-              setIsChanging(false)
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+        }}
+      >
+        <h2 style={{ margin: 0 }}>
+          Workout {currentVariation}
+        </h2>
+        {!isChanging && (
+          <Button
+            variant="secondary"
+            onClick={() => setIsChanging(true)}
+            aria-label="Edit workout"
+            style={{
+              minHeight: '48px',
+              padding: '0 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '1rem',
+              lineHeight: 1,
             }}
           >
-            Confirm switch
-          </button>
-          <button
-            type="button"
+            <span aria-hidden="true">✎</span>
+            Edit Workout
+          </Button>
+        )}
+      </div>
+      {isChanging && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 20,
+            }}
+            aria-hidden="true"
             onClick={() => setIsChanging(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={panelId}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              zIndex: 21,
+            }}
           >
-            Cancel
-          </button>
-        </div>
+            <div
+              style={{
+                border: '1px solid #d4d4d4',
+                padding: '12px',
+                borderRadius: '12px',
+                background: '#f9f9f9',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                width: '100%',
+                maxWidth: '420px',
+              }}
+            >
+              <div id={panelId} style={{ fontWeight: 700 }}>
+                Switch workout variation
+              </div>
+              <div style={{ color: '#555', fontSize: '0.9rem' }}>
+                This will replace the exercises in your current
+                workout.
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <label
+                  style={{
+                    border:
+                      selected === 'A'
+                        ? '2px solid #2563EB'
+                        : '1px solid #d1d5db',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background:
+                      selected === 'A' ? '#eff6ff' : '#ffffff',
+                    minHeight: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="variation"
+                    value="A"
+                    checked={selected === 'A'}
+                    onChange={() => setSelected('A')}
+                  />
+                  Workout A
+                </label>
+                <label
+                  style={{
+                    border:
+                      selected === 'B'
+                        ? '2px solid #2563EB'
+                        : '1px solid #d1d5db',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background:
+                      selected === 'B' ? '#eff6ff' : '#ffffff',
+                    minHeight: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="variation"
+                    value="B"
+                    checked={selected === 'B'}
+                    onChange={() => setSelected('B')}
+                  />
+                  Workout B
+                </label>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    onConfirmChange(selected)
+                    setIsChanging(false)
+                  }}
+                  style={{ width: '100%' }}
+                >
+                  Confirm Switch
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsChanging(false)}
+                  style={{ width: '100%' }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
@@ -575,15 +764,6 @@ function PlateCalculatorPanel({
                   Bar only
                 </div>
               )}
-            </div>
-            <div
-              style={{
-                marginTop: '6px',
-                fontSize: '0.8rem',
-                color: '#6b7280',
-              }}
-            >
-              Diagram shows one side only
             </div>
           </div>
           <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>

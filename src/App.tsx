@@ -239,17 +239,12 @@ function AppBootstrap() {
   if (view === 'history') {
     return (
       <div>
-        <button
-          type="button"
-          onClick={() => setView('active')}
-        >
-          Back to Workout
-        </button>
         <WorkoutHistoryScreen
           workoutRepository={workoutRepository}
           exerciseDefinitions={exerciseDefinitions}
           progressionStateRepository={progressionStateRepository}
           appStateRepository={appStateRepository}
+          onBack={() => setView('home')}
         />
       </div>
     )
@@ -260,7 +255,12 @@ function AppBootstrap() {
         exerciseDefinitions={exerciseDefinitions}
         progressionStateRepository={progressionStateRepository}
         appStateRepository={appStateRepository}
-        onBack={() => setView('active')}
+        onBack={() => setView('home')}
+        onSaveSuccess={updatedProgressions => {
+          setProgressionStates(
+            buildProgressionMap(updatedProgressions)
+          )
+        }}
       />
     )
   }
@@ -268,8 +268,12 @@ function AppBootstrap() {
   if (!workout) {
     return (
       <div>
-        <Button variant="secondary" onClick={() => setView('home')}>
-          Back to Home
+        <Button
+          variant="secondary"
+          onClick={() => setView('home')}
+          style={{ width: '100%' }}
+        >
+          Back
         </Button>
         <div>No active workout found.</div>
       </div>
@@ -285,8 +289,12 @@ function AppBootstrap() {
           padding: '0 16px',
         }}
       >
-        <Button variant="secondary" onClick={() => setView('home')}>
-          Back to Home
+        <Button
+          variant="secondary"
+          onClick={() => setView('home')}
+          style={{ width: '100%' }}
+        >
+          Back
         </Button>
         {activeStopwatch?.startTime != null &&
           !activeStopwatch.dismissed && (
@@ -404,6 +412,7 @@ function AppBootstrap() {
             setCompleting(false)
           }
         }}
+          style={{ width: '100%' }}
           disabled={completing}
         >
           {completing ? 'Completing...' : 'Complete Workout'}

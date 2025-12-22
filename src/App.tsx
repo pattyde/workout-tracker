@@ -28,6 +28,8 @@ import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
 import { updateExerciseWorkWeight } from './services/exerciseWorkWeightService'
 import ProgressionIncrementScreen from './ui/ProgressionIncrementScreen'
 import { getOrInitAppState } from './services/appStateService'
+import { getActiveWorkout } from './services/workoutLifecycleService'
+import HomeScreen from './ui/HomeScreen'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -85,8 +87,8 @@ function AppBootstrap() {
   >(null)
   const [completing, setCompleting] = useState(false)
   const [view, setView] = useState<
-    'active' | 'history' | 'progression'
-  >('active')
+    'home' | 'active' | 'history' | 'progression'
+  >('home')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -106,14 +108,10 @@ function AppBootstrap() {
         )
         setProgressionStates(progressionMap)
 
-        const activeWorkout = await startOrResumeWorkout({
-          nowMs: Date.now(),
-          exerciseDefinitions,
-          progressionStates: progressionMap,
+        const activeWorkout = await getActiveWorkout(
           workoutRepository,
-          appStateRepository,
-        })
-
+          appStateRepository
+        )
         if (!cancelled) {
           setWorkout(activeWorkout)
           const appState = await getOrInitAppState(
@@ -192,6 +190,39 @@ function AppBootstrap() {
     return <div>Error: {error}</div>
   }
 
+  if (view === 'home') {
+    return (
+      <HomeScreen
+        hasActiveWorkout={Boolean(workout)}
+        onResume={async () => {
+          const activeWorkout = await getActiveWorkout(
+            workoutRepository,
+            appStateRepository
+          )
+          if (!activeWorkout) {
+            setWorkout(null)
+            return
+          }
+          setWorkout(activeWorkout)
+          setView('active')
+        }}
+        onStartNew={async () => {
+          const activeWorkout = await startOrResumeWorkout({
+            nowMs: Date.now(),
+            exerciseDefinitions,
+            progressionStates,
+            workoutRepository,
+            appStateRepository,
+          })
+          setWorkout(activeWorkout)
+          setView('active')
+        }}
+        onViewHistory={() => setView('history')}
+        onViewSettings={() => setView('progression')}
+      />
+    )
+  }
+
   if (view === 'history') {
     return (
       <div>
@@ -226,15 +257,9 @@ function AppBootstrap() {
       <div>
         <button
           type="button"
-          onClick={() => setView('history')}
+          onClick={() => setView('home')}
         >
-          View History
-        </button>
-        <button
-          type="button"
-          onClick={() => setView('progression')}
-        >
-          Edit Increments
+          Back to Home
         </button>
         <div>No active workout found.</div>
       </div>
@@ -245,15 +270,9 @@ function AppBootstrap() {
     <div>
       <button
         type="button"
-        onClick={() => setView('history')}
+        onClick={() => setView('home')}
       >
-        View History
-      </button>
-      <button
-        type="button"
-        onClick={() => setView('progression')}
-      >
-        Edit Increments
+        Back to Home
       </button>
       {activeStopwatch?.startTime != null &&
         !activeStopwatch.dismissed && (
@@ -339,6 +358,7 @@ function AppBootstrap() {
             )
             setWorkout(null)
             setActiveStopwatch(null)
+            setView('home')
           } catch (err) {
             const message =
               err instanceof Error

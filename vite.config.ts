@@ -7,6 +7,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/workout-tracker/',
   // @ts-expect-error - Known type conflict: vitest bundles its own vite version causing plugin type mismatch
   plugins: [react()],
   resolve: {

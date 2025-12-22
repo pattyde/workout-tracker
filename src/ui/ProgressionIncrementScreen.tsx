@@ -15,6 +15,7 @@ import { updateProgressionIncrement } from '../services/progressionIncrementServ
 import { updatePreferredBarType } from '../services/preferredBarService'
 import { getOrInitAppState } from '../services/appStateService'
 import { updateEquipmentInventory } from '../services/equipmentInventoryService'
+import Button from './Button'
 
 interface ProgressionIncrementScreenProps {
   exerciseDefinitions: Record<string, ExerciseDefinition>
@@ -46,9 +47,7 @@ export default function ProgressionIncrementScreen({
     useState<Record<string, boolean>>({})
   const [equipmentPlateDrafts, setEquipmentPlateDrafts] =
     useState<Record<string, string>>({})
-  const [saving, setSaving] = useState<string | null>(null)
-  const [equipmentSaving, setEquipmentSaving] =
-    useState(false)
+  const [saving, setSaving] = useState(false)
 
   function getPlateKey(plate: EquipmentInventoryPlate) {
     return `${plate.weight}-${plate.unit}`
@@ -125,12 +124,21 @@ export default function ProgressionIncrementScreen({
   }
 
   return (
-    <div>
-      <button type="button" onClick={onBack}>
+    <div
+      style={{
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        paddingBottom: '32px',
+        maxWidth: '600px',
+        margin: '0 auto',
+      }}
+    >
+      <Button variant="secondary" onClick={onBack}>
         Back
-      </button>
-      <h2>Progression Increments</h2>
-      <h3>Exercise Settings</h3>
+      </Button>
+      <h2 style={{ margin: 0 }}>Exercise Settings</h2>
       {progressions.map(progression => {
         const definition =
           exerciseDefinitions[progression.exerciseDefinitionId]
@@ -148,78 +156,46 @@ export default function ProgressionIncrementScreen({
           'olympic-20kg'
 
         return (
-          <div key={progression.exerciseDefinitionId}>
-            <div>{name}</div>
-            <div>
-              <label>
-                Preferred bar
-                <div>
-                  <select
-                    value={barDraft}
-                    onChange={event => {
-                      const selected = event.target.value
-                      setBarDrafts(current => ({
-                        ...current,
-                        [progression.exerciseDefinitionId]:
-                          selected,
-                      }))
-                    }}
-                  >
-                    {listBarTypes().map(bar => (
-                      <option key={bar.id} value={bar.id}>
-                        {bar.name} ({bar.weight} {bar.unit})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </label>
-              <div>
-                Current: {preferredBar?.name ?? 'Olympic bar'} (
-                {preferredBar?.weight ?? 20}{' '}
-                {preferredBar?.unit ?? 'kg'})
-              </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  const selected = barDraft
-                  setSaving(progression.exerciseDefinitionId)
-                  setError(null)
-                  try {
-                    const updated =
-                      await updatePreferredBarType(
-                        progression.exerciseDefinitionId,
-                        selected,
-                        progressionStateRepository
-                      )
-                    setProgressions(current =>
-                      current.map(item =>
-                        item.exerciseDefinitionId ===
-                        updated.exerciseDefinitionId
-                          ? updated
-                          : item
-                      )
-                    )
-                  } catch (err) {
-                    const message =
-                      err instanceof Error
-                        ? err.message
-                        : 'Unknown error'
-                    setError(message)
-                  } finally {
-                    setSaving(null)
-                  }
-                }}
-                disabled={
-                  saving === progression.exerciseDefinitionId
-                }
-              >
-                {saving === progression.exerciseDefinitionId
-                  ? 'Saving...'
-                  : 'Save bar'}
-              </button>
+          <div
+            key={progression.exerciseDefinitionId}
+            style={{
+              border: '1px solid #d6d6d6',
+              borderRadius: '12px',
+              padding: '16px',
+              background: '#f9f9f9',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+              {name}
             </div>
             <label>
-              Increment
+              Preferred bar
+              <div>
+                <select
+                  value={barDraft}
+                  onChange={event => {
+                    const selected = event.target.value
+                    setBarDrafts(current => ({
+                      ...current,
+                      [progression.exerciseDefinitionId]:
+                        selected,
+                    }))
+                  }}
+                  style={{ minHeight: '48px', width: '100%' }}
+                >
+                  {listBarTypes().map(bar => (
+                    <option key={bar.id} value={bar.id}>
+                      {bar.name} ({bar.weight} {bar.unit})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </label>
+            <label>
+              Progression increment
               <div>
                 <input
                   type="number"
@@ -233,60 +209,35 @@ export default function ProgressionIncrementScreen({
                         event.target.value,
                     }))
                   }
-                />{' '}
-                {unit}
+                  style={{ minHeight: '48px', width: '100%' }}
+                />
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                Unit: {unit}
               </div>
             </label>
-            <button
-              type="button"
-              onClick={async () => {
-                const value = Number(draft)
-                setSaving(progression.exerciseDefinitionId)
-                setError(null)
-                try {
-                  const updated =
-                    await updateProgressionIncrement(
-                      progression.exerciseDefinitionId,
-                      value,
-                      progressionStateRepository
-                    )
-                  setProgressions(current =>
-                    current.map(item =>
-                      item.exerciseDefinitionId ===
-                      updated.exerciseDefinitionId
-                        ? updated
-                        : item
-                    )
-                  )
-                } catch (err) {
-                  const message =
-                    err instanceof Error
-                      ? err.message
-                      : 'Unknown error'
-                  setError(message)
-                } finally {
-                  setSaving(null)
-                }
-              }}
-              disabled={
-                saving === progression.exerciseDefinitionId
-              }
-            >
-              {saving === progression.exerciseDefinitionId
-                ? 'Saving...'
-                : 'Save'}
-            </button>
           </div>
         )
       })}
-      <h3>Equipment</h3>
+      <div
+        style={{
+          border: '1px solid #d6d6d6',
+          borderRadius: '12px',
+          padding: '16px',
+          background: '#f9f9f9',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}
+      >
+        <h3 style={{ margin: 0 }}>Equipment</h3>
       {!equipmentInventory && (
         <div>Loading equipment...</div>
       )}
       {equipmentInventory && (
         <div>
-          <div>
-            <strong>Bars</strong>
+          <div style={{ fontWeight: 600, marginBottom: '8px' }}>
+            Bars
           </div>
           {equipmentInventory.bars.map(bar => {
             const enabled = equipmentBarDrafts[bar.id] ?? false
@@ -307,92 +258,177 @@ export default function ProgressionIncrementScreen({
               </label>
             )
           })}
-          <div>
-            <strong>Plates</strong>
+          <div style={{ fontWeight: 600, marginTop: '12px' }}>
+            Plates
           </div>
           {equipmentInventory.plates.map(plate => {
             const key = getPlateKey(plate)
             const draft = equipmentPlateDrafts[key] ?? '0'
+            const quantity = Math.max(0, Number(draft) || 0)
             return (
-              <label key={key}>
-                {plate.weight} {plate.unit}{' '}
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={draft}
-                  onChange={event => {
-                    const value = event.target.value
-                    setEquipmentPlateDrafts(current => ({
-                      ...current,
-                      [key]: value,
-                    }))
+              <div
+                key={key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #e5e7eb',
+                  background: '#ffffff',
+                  marginTop: '6px',
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>
+                  {plate.weight} {plate.unit}
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
-                />
-              </label>
+                >
+                  <button
+                    type="button"
+                    aria-label={`Decrease ${plate.weight} ${plate.unit} plates`}
+                    onClick={() => {
+                      const next = Math.max(0, quantity - 1)
+                      setEquipmentPlateDrafts(current => ({
+                        ...current,
+                        [key]: String(next),
+                      }))
+                    }}
+                    style={{
+                      minWidth: '40px',
+                      minHeight: '40px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      background: '#f3f4f6',
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    −
+                  </button>
+                  <div
+                    style={{
+                      minWidth: '24px',
+                      textAlign: 'center',
+                      fontWeight: 600,
+                    }}
+                    aria-label={`Quantity ${quantity}`}
+                  >
+                    {quantity}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Increase ${plate.weight} ${plate.unit} plates`}
+                    onClick={() => {
+                      const next = quantity + 1
+                      setEquipmentPlateDrafts(current => ({
+                        ...current,
+                        [key]: String(next),
+                      }))
+                    }}
+                    style={{
+                      minWidth: '40px',
+                      minHeight: '40px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      background: '#f3f4f6',
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             )
           })}
-          <button
-            type="button"
-            onClick={async () => {
-              if (!equipmentInventory) return
-              setEquipmentSaving(true)
-              setError(null)
-              try {
-                const updatedPlates =
-                  equipmentInventory.plates.map(plate => {
-                    const key = getPlateKey(plate)
-                    const raw =
-                      equipmentPlateDrafts[key] ?? '0'
-                    const quantity = Number(raw)
-                    if (
-                      !Number.isFinite(quantity) ||
-                      quantity < 0
-                    ) {
-                      throw new Error(
-                        'Plate quantities must be zero or greater'
-                      )
-                    }
-                    return {
-                      ...plate,
-                      quantity,
-                    }
-                  })
-                const updatedBars =
-                  equipmentInventory.bars.map(bar => ({
-                    ...bar,
-                    enabled:
-                      equipmentBarDrafts[bar.id] ?? false,
-                  }))
-                const updatedInventory: EquipmentInventory = {
-                  bars: updatedBars,
-                  plates: updatedPlates,
-                }
-                const updatedAppState =
-                  await updateEquipmentInventory(
-                    updatedInventory,
-                    appStateRepository
-                  )
-                setEquipmentInventory(
-                  updatedAppState.equipmentInventory ??
-                    updatedInventory
-                )
-              } catch (err) {
-                const message =
-                  err instanceof Error
-                    ? err.message
-                    : 'Unknown error'
-                setError(message)
-              } finally {
-                setEquipmentSaving(false)
-              }
-            }}
-            disabled={equipmentSaving}
-          >
-            {equipmentSaving ? 'Saving...' : 'Save equipment'}
-          </button>
         </div>
       )}
+      </div>
+      <Button
+        variant="primary"
+        onClick={async () => {
+          setSaving(true)
+          setError(null)
+          try {
+            for (const progression of progressions) {
+              const incrementRaw =
+                drafts[progression.exerciseDefinitionId] ?? ''
+              const increment = Number(incrementRaw)
+              await updateProgressionIncrement(
+                progression.exerciseDefinitionId,
+                increment,
+                progressionStateRepository
+              )
+              const barId =
+                barDrafts[progression.exerciseDefinitionId] ??
+                'olympic-20kg'
+              await updatePreferredBarType(
+                progression.exerciseDefinitionId,
+                barId,
+                progressionStateRepository
+              )
+            }
+
+            if (equipmentInventory) {
+              const updatedPlates =
+                equipmentInventory.plates.map(plate => {
+                  const key = getPlateKey(plate)
+                  const raw =
+                    equipmentPlateDrafts[key] ?? '0'
+                  const quantity = Number(raw)
+                  if (
+                    !Number.isFinite(quantity) ||
+                    quantity < 0
+                  ) {
+                    throw new Error(
+                      'Plate quantities must be zero or greater'
+                    )
+                  }
+                  return {
+                    ...plate,
+                    quantity,
+                  }
+                })
+              const updatedBars =
+                equipmentInventory.bars.map(bar => ({
+                  ...bar,
+                  enabled: equipmentBarDrafts[bar.id] ?? false,
+                }))
+              const updatedInventory: EquipmentInventory = {
+                bars: updatedBars,
+                plates: updatedPlates,
+              }
+              const updatedAppState =
+                await updateEquipmentInventory(
+                  updatedInventory,
+                  appStateRepository
+                )
+              setEquipmentInventory(
+                updatedAppState.equipmentInventory ??
+                  updatedInventory
+              )
+            }
+
+            const refreshed =
+              await progressionStateRepository.listAll()
+            setProgressions(refreshed)
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : 'Unknown error'
+            setError(message)
+          } finally {
+            setSaving(false)
+          }
+        }}
+        style={{ width: '100%', minHeight: '52px' }}
+        disabled={saving}
+      >
+        {saving ? 'Saving...' : 'Save'}
+      </Button>
     </div>
   )
 }

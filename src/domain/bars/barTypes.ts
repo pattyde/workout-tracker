@@ -12,12 +12,6 @@ const BAR_TYPES: Record<string, BarType> = {
     weight: 20,
     unit: 'kg',
   },
-  'training-15kg': {
-    id: 'training-15kg',
-    name: 'Training bar',
-    weight: 15,
-    unit: 'kg',
-  },
   'technique-7.5kg': {
     id: 'technique-7.5kg',
     name: 'Technique bar',

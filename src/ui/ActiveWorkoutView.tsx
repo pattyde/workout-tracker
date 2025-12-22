@@ -6,6 +6,7 @@ import { calculateInventoryPlateStack } from '../domain/calculations/inventoryPl
 import { getExerciseWorkWeight } from '../domain/exercises/workWeight'
 import type { ProgressionState } from '../domain/models/ProgressionState'
 import type { EquipmentInventory } from '../domain/models/AppState'
+import Button from './Button'
 
 interface ActiveWorkoutViewProps {
   workout: Workout
@@ -40,6 +41,9 @@ export default function ActiveWorkoutView({
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
+        paddingBottom: '32px',
+        maxWidth: '600px',
+        margin: '0 auto',
       }}
     >
       <div>
@@ -155,9 +159,6 @@ function ExerciseCard({
       >
         <div>
           <h3 style={{ margin: 0 }}>{exerciseDefinitionName}</h3>
-          <div style={{ fontSize: '0.85rem', color: '#555' }}>
-            Work weight
-          </div>
         </div>
         {isEditingWeight ? null : (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -256,8 +257,8 @@ function ExerciseCard({
       <div
         style={{
           display: 'flex',
-          gap: '8px',
-          flexWrap: 'wrap',
+          gap: '6px',
+          flexWrap: 'nowrap',
         }}
       >
         {orderedSets.map((set, index) => (
@@ -304,20 +305,21 @@ function SetRow({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '10px 12px',
+        padding: '8px 6px',
         borderRadius: '10px',
         border: isPending
           ? '1px dashed #cfcfcf'
           : '1px solid #e2e2e2',
         background: isPending ? '#f6f6f6' : '#ffffff',
-        minHeight: '48px',
-        minWidth: '52px',
+        minHeight: '52px',
+        flex: '1 1 0',
+        minWidth: 0,
       }}
       aria-label={`Set ${index + 1}`}
     >
       <div
         style={{
-          fontSize: '1.1rem',
+          fontSize: '1.05rem',
           fontWeight: isPending ? 500 : 700,
           color: isPending ? '#888' : '#111',
           opacity: isPending ? 0.7 : 1,
@@ -351,12 +353,9 @@ function VariationHeader({
   return (
     <div>
       <h2>Variation {currentVariation}</h2>
-      <button
-        type="button"
-        onClick={() => setIsChanging(true)}
-      >
+      <Button variant="secondary" onClick={() => setIsChanging(true)}>
         Change variation
-      </button>
+      </Button>
       {isChanging && (
         <div
           style={{

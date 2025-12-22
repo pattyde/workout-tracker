@@ -7,6 +7,7 @@ describe('HomeScreen', () => {
     render(
       <HomeScreen
         hasActiveWorkout={false}
+        resumeExerciseNames={undefined}
         onResume={() => {}}
         onStartNew={() => {}}
         onViewHistory={() => {}}
@@ -17,15 +18,14 @@ describe('HomeScreen', () => {
     expect(
       screen.getByText('Start New Workout')
     ).toBeInTheDocument()
-    expect(
-      screen.queryByText('Resume Workout')
-    ).toBeNull()
+    expect(screen.queryByText('Resume Workout')).toBeNull()
   })
 
   it('shows resume when a workout is active', () => {
     render(
       <HomeScreen
         hasActiveWorkout={true}
+        resumeExerciseNames={['Squat', 'Bench Press']}
         onResume={() => {}}
         onStartNew={() => {}}
         onViewHistory={() => {}}
@@ -42,6 +42,9 @@ describe('HomeScreen', () => {
     expect(
       screen.queryByText('Start New Workout')
     ).toBeNull()
+    expect(
+      screen.getByText('Squat • Bench Press')
+    ).toBeInTheDocument()
   })
 
   it('supports navigation actions', () => {
@@ -52,6 +55,7 @@ describe('HomeScreen', () => {
     render(
       <HomeScreen
         hasActiveWorkout={false}
+        resumeExerciseNames={undefined}
         onResume={() => {}}
         onStartNew={onStartNew}
         onViewHistory={onViewHistory}

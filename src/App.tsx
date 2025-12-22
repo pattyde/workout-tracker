@@ -31,6 +31,7 @@ import { getOrInitAppState } from './services/appStateService'
 import { getActiveWorkout } from './services/workoutLifecycleService'
 import HomeScreen from './ui/HomeScreen'
 import { switchActiveWorkoutVariation } from './services/workoutVariationService'
+import Button from './ui/Button'
 
 function buildDefinitionMap(
   definitions: ExerciseDefinition[]
@@ -192,9 +193,20 @@ function AppBootstrap() {
   }
 
   if (view === 'home') {
+    const resumeExerciseNames = workout
+      ? workout.exerciseInstances
+          .map(
+            exercise =>
+              exerciseDefinitions[exercise.exerciseDefinitionId]
+                ?.name ?? 'Unknown Exercise'
+          )
+          .filter(name => name.length > 0)
+      : undefined
+
     return (
       <HomeScreen
         hasActiveWorkout={Boolean(workout)}
+        resumeExerciseNames={resumeExerciseNames}
         onResume={async () => {
           const activeWorkout = await getActiveWorkout(
             workoutRepository,
@@ -256,12 +268,9 @@ function AppBootstrap() {
   if (!workout) {
     return (
       <div>
-        <button
-          type="button"
-          onClick={() => setView('home')}
-        >
+        <Button variant="secondary" onClick={() => setView('home')}>
           Back to Home
-        </button>
+        </Button>
         <div>No active workout found.</div>
       </div>
     )
@@ -269,41 +278,46 @@ function AppBootstrap() {
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => setView('home')}
+      <div
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '0 16px',
+        }}
       >
-        Back to Home
-      </button>
-      {activeStopwatch?.startTime != null &&
-        !activeStopwatch.dismissed && (
-          <StopwatchDisplay
-            stopwatch={activeStopwatch}
-            onEvents={(events: NotificationEvent[]) => {
-              events.forEach(event => {
-                console.info(
-                  `[Rest Alert] ${event.message}`
+        <Button variant="secondary" onClick={() => setView('home')}>
+          Back to Home
+        </Button>
+        {activeStopwatch?.startTime != null &&
+          !activeStopwatch.dismissed && (
+            <StopwatchDisplay
+              stopwatch={activeStopwatch}
+              onEvents={(events: NotificationEvent[]) => {
+                events.forEach(event => {
+                  console.info(
+                    `[Rest Alert] ${event.message}`
+                  )
+                })
+              }}
+              onStopwatchUpdate={updatedStopwatch => {
+                setActiveStopwatch(updatedStopwatch)
+                void updateActiveStopwatch(
+                  updatedStopwatch,
+                  appStateRepository
                 )
-              })
-            }}
-            onStopwatchUpdate={updatedStopwatch => {
-              setActiveStopwatch(updatedStopwatch)
-              void updateActiveStopwatch(
-                updatedStopwatch,
-                appStateRepository
-              )
-            }}
-            onDismiss={() => {
-              void dismissActiveStopwatch(
-                appStateRepository
-              ).then(updatedAppState => {
-                setActiveStopwatch(
-                  updatedAppState.activeStopwatch ?? null
-                )
-              })
-            }}
-          />
-        )}
+              }}
+              onDismiss={() => {
+                void dismissActiveStopwatch(
+                  appStateRepository
+                ).then(updatedAppState => {
+                  setActiveStopwatch(
+                    updatedAppState.activeStopwatch ?? null
+                  )
+                })
+              }}
+            />
+          )}
+      </div>
       <ActiveWorkoutView
         workout={workout}
         exerciseDefinitions={exerciseDefinitions}
@@ -352,44 +366,52 @@ function AppBootstrap() {
           setWorkout(updated)
         }}
       />
-      <button
-        type="button"
-        onClick={async () => {
-          if (!workout || completing) return
-          setCompleting(true)
-          setCompletionError(null)
-          try {
-            await completeActiveWorkout({
-              nowMs: Date.now(),
-              workoutRepository,
-              progressionStateRepository,
-              appStateRepository,
-            })
-            const updatedProgressions =
-              await progressionStateRepository.listAll()
-            setProgressionStates(
-              buildProgressionMap(updatedProgressions)
-            )
-            setWorkout(null)
-            setActiveStopwatch(null)
-            setView('home')
-          } catch (err) {
-            const message =
-              err instanceof Error
-                ? err.message
-                : 'Unknown error'
-            setCompletionError(message)
+      <div
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '0 16px 32px',
+        }}
+      >
+        <Button
+          variant="primary"
+          onClick={async () => {
+            if (!workout || completing) return
+            setCompleting(true)
+            setCompletionError(null)
+            try {
+              await completeActiveWorkout({
+                nowMs: Date.now(),
+                workoutRepository,
+                progressionStateRepository,
+                appStateRepository,
+              })
+              const updatedProgressions =
+                await progressionStateRepository.listAll()
+              setProgressionStates(
+                buildProgressionMap(updatedProgressions)
+              )
+              setWorkout(null)
+              setActiveStopwatch(null)
+              setView('home')
+            } catch (err) {
+              const message =
+                err instanceof Error
+                  ? err.message
+                  : 'Unknown error'
+              setCompletionError(message)
           } finally {
             setCompleting(false)
           }
         }}
-        disabled={completing}
-      >
-        {completing ? 'Completing...' : 'Complete Workout'}
-      </button>
-      {completionError && (
-        <div>Error: {completionError}</div>
-      )}
+          disabled={completing}
+        >
+          {completing ? 'Completing...' : 'Complete Workout'}
+        </Button>
+        {completionError && (
+          <div>Error: {completionError}</div>
+        )}
+      </div>
     </div>
   )
 }

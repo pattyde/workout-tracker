@@ -26,13 +26,15 @@ export function getStopwatchNotificationEvents(
     return { events: [], updatedStopwatch: state }
   }
 
-  const events = triggered.map(thresholdSec => ({
-    id: `rest-alert-${thresholdSec}-${nowMs}`,
-    type: 'rest-alert',
-    thresholdSec,
-    timestampMs: nowMs,
-    message: buildRestAlertMessage(thresholdSec),
-  }))
+  const events: NotificationEvent[] = triggered.map(
+    thresholdSec => ({
+      id: `rest-alert-${thresholdSec}-${nowMs}`,
+      type: 'rest-alert',
+      thresholdSec,
+      timestampMs: nowMs,
+      message: buildRestAlertMessage(thresholdSec),
+    })
+  )
 
   return {
     events,
@@ -57,7 +59,7 @@ export function mapStopwatchAlertsToNotifications(
 
   return triggered.map(thresholdSec => ({
     id: `rest-alert-${thresholdSec}-${nowMs}`,
-    type: 'rest-alert',
+    type: 'rest-alert' as const,
     thresholdSec,
     timestampMs: nowMs,
     message: buildRestAlertMessage(thresholdSec),

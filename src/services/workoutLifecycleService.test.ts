@@ -72,7 +72,9 @@ describe('WorkoutLifecycleService', () => {
   it('starts the first workout and initializes app state', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-1')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000001'
+    )
 
     const workout = await startWorkout(
       makeExerciseInstances(),
@@ -123,7 +125,9 @@ describe('WorkoutLifecycleService', () => {
   it('prevents multiple active workouts', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-3')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000003'
+    )
 
     const first = await startWorkout(
       makeExerciseInstances(),

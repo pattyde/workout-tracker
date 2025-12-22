@@ -128,11 +128,16 @@ describe('workout history service', () => {
       unit: 'kg',
     })
 
+    const firstExercise = workout.exerciseInstances[0]
+    if (!firstExercise) {
+      throw new Error('Expected exercise instance')
+    }
+
     const updated = {
       ...workout,
       exerciseInstances: [
         {
-          ...workout.exerciseInstances[0],
+          ...firstExercise,
           sets: [
             makeWorkSet({
               status: 'completed',

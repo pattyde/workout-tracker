@@ -49,10 +49,14 @@ describe('IndexedDbWorkoutRepository', () => {
 
   it('lists all workouts', async () => {
     const repo = new IndexedDbWorkoutRepository()
-    const workouts = [makeWorkout('a'), makeWorkout('b')]
+    const workouts: [Workout, Workout] = [
+      makeWorkout('a'),
+      makeWorkout('b'),
+    ]
+    const [first, second] = workouts
 
-    await repo.save(workouts[0])
-    await repo.save(workouts[1])
+    await repo.save(first)
+    await repo.save(second)
 
     const all = await repo.listAll()
     const ids = all.map(w => w.id).sort()

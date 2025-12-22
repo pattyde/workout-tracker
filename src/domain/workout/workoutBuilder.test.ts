@@ -124,6 +124,11 @@ describe('buildWorkoutExercises', () => {
   })
 
   it('uses preferred bar type when provided', () => {
+    const squatProgression = PROGRESSION_STATES.squat
+    if (!squatProgression) {
+      throw new Error('Expected squat progression state')
+    }
+
     const exercises = buildWorkoutExercises({
       workoutId: 'w-5',
       variation: 'A',
@@ -131,15 +136,15 @@ describe('buildWorkoutExercises', () => {
       progressionStates: {
         ...PROGRESSION_STATES,
         squat: {
-          ...PROGRESSION_STATES.squat,
+          ...squatProgression,
           preferredBarTypeId: 'training-15kg',
         },
       },
     })
 
-    const squat = exercises[0]
-    if (!squat) throw new Error('Expected squat')
-    expect(squat.barTypeId).toBe('training-15kg')
+    const squatExercise = exercises[0]
+    if (!squatExercise) throw new Error('Expected squat')
+    expect(squatExercise.barTypeId).toBe('training-15kg')
   })
 
   it('builds variation B with correct exercises and sets', () => {

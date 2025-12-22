@@ -4,13 +4,13 @@ A client-only workout tracking application with progressive overload based on 5x
 
 ## Features
 
-- Workout tracking with warmups and work sets
+- Workout tracking for 5x5 program
 - Progression logic and deload logic
-- Plate calculator (single lifter and shared bar mode)
-- Rest timer (count-up with audible alerts, background capable)
+- Plate calculator (single lifter) - TODO: shared bar
+- Rest timer (count-up with alerts, background capable)
 - Editable past workouts with recalculation rules
-- Charts (exclude warmups, show best-ever)
-- Manual local backup/export and import
+- Charts (exclude warmups, show best-ever) - TODO
+- Manual local backup/export and import - TODO
 - Accessibility-friendly, simple UI
 
 ## Tech Stack

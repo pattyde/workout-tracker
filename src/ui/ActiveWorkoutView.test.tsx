@@ -164,11 +164,16 @@ describe('ActiveWorkoutView', () => {
   })
 
   it('opens the plate calculator and shows plates', () => {
+    const exercise = WORKOUT.exerciseInstances[0]
+    if (!exercise) {
+      throw new Error('Expected exercise instance')
+    }
+
     const workout: Workout = {
       ...WORKOUT,
       exerciseInstances: [
         {
-          ...WORKOUT.exerciseInstances[0],
+          ...exercise,
           workWeight: 60,
         },
       ],
@@ -200,11 +205,16 @@ describe('ActiveWorkoutView', () => {
   })
 
   it('shows a warning when exact weight is not achievable', () => {
+    const exercise = WORKOUT.exerciseInstances[0]
+    if (!exercise) {
+      throw new Error('Expected exercise instance')
+    }
+
     const workout: Workout = {
       ...WORKOUT,
       exerciseInstances: [
         {
-          ...WORKOUT.exerciseInstances[0],
+          ...exercise,
           workWeight: 62.5,
         },
       ],

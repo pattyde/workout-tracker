@@ -9,8 +9,6 @@ describe('Plate Calculator – Single Lifter', () => {
     availablePlates: [25, 20, 15, 10, 5, 2.5],
     minimumPlateWeight: 2.5,
     roundingIncrement: 2.5,
-    mode: 'single',
-    optimizeForMinimalPlateChanges: false,
     unit: 'kg',
   }
 

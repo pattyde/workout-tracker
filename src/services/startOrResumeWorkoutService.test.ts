@@ -190,7 +190,9 @@ describe('startOrResumeWorkout', () => {
   it('starts a new workout when none exists', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-2')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000002'
+    )
     await appStateRepo.save({
       id: 'app',
       activeStopwatch: null,
@@ -208,15 +210,21 @@ describe('startOrResumeWorkout', () => {
       appStateRepository: appStateRepo,
     })
 
-    expect(result.id).toBe('w-2')
+    expect(result.id).toBe(
+      '00000000-0000-0000-0000-000000000002'
+    )
     expect(result.completed).toBe(false)
-    expect(appStateRepo.state?.activeWorkoutId).toBe('w-2')
+    expect(appStateRepo.state?.activeWorkoutId).toBe(
+      '00000000-0000-0000-0000-000000000002'
+    )
   })
 
   it('clears stale activeWorkoutId and starts new workout', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-3')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000003'
+    )
     await appStateRepo.save({
       id: 'app',
       activeStopwatch: null,
@@ -234,14 +242,20 @@ describe('startOrResumeWorkout', () => {
       appStateRepository: appStateRepo,
     })
 
-    expect(result.id).toBe('w-3')
-    expect(appStateRepo.state?.activeWorkoutId).toBe('w-3')
+    expect(result.id).toBe(
+      '00000000-0000-0000-0000-000000000003'
+    )
+    expect(appStateRepo.state?.activeWorkoutId).toBe(
+      '00000000-0000-0000-0000-000000000003'
+    )
   })
 
   it('selects next variation based on completed workouts', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-4')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000004'
+    )
     await workoutRepo.save(
       makeCompletedWorkout('w-10', 'A', 1000)
     )
@@ -268,7 +282,9 @@ describe('startOrResumeWorkout', () => {
   it('uses builder output for exercises and weights', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const appStateRepo = new MemoryAppStateRepository()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('w-5')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(
+      '00000000-0000-0000-0000-000000000005'
+    )
 
     const result = await startOrResumeWorkout({
       nowMs: 3000,

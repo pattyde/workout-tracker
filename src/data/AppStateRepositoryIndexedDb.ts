@@ -72,4 +72,13 @@ export class IndexedDbAppStateRepository
     await transactionDone(tx)
     db.close()
   }
+
+  async clear(): Promise<void> {
+    const db = await openDb()
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    const store = tx.objectStore(STORE_NAME)
+    await requestToPromise(store.clear())
+    await transactionDone(tx)
+    db.close()
+  }
 }

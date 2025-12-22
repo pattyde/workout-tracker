@@ -93,8 +93,8 @@ describe('ActiveWorkoutView', () => {
     expect(screen.getByText('Squat')).toBeInTheDocument()
     expect(screen.getByText('Work weight')).toBeInTheDocument()
     expect(screen.getByText('20 kg')).toBeInTheDocument()
-    expect(screen.getByText('Set 1')).toBeInTheDocument()
-    expect(screen.getByText('Reps: 5')).toBeInTheDocument()
+    expect(screen.getByLabelText('Set 1')).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
     expect(screen.queryByText('20 x 5')).toBeNull()
   })
 
@@ -159,7 +159,7 @@ describe('ActiveWorkoutView', () => {
       />
     )
 
-    fireEvent.click(screen.getByText('Set 1'))
+    fireEvent.click(screen.getByLabelText('Set 1'))
     expect(handleTap).toHaveBeenCalledWith('set-1')
   })
 

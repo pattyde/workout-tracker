@@ -34,12 +34,21 @@ export default function ActiveWorkoutView({
   )
 
   return (
-    <div>
-      <h1>Workout Tracker</h1>
-      <VariationHeader
-        currentVariation={workout.variation}
-        onConfirmChange={onVariationChange}
-      />
+    <div
+      style={{
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+      }}
+    >
+      <div>
+        <h1 style={{ margin: 0 }}>Workout Tracker</h1>
+        <VariationHeader
+          currentVariation={workout.variation}
+          onConfirmChange={onVariationChange}
+        />
+      </div>
       {orderedExercises.map(exercise => (
         <ExerciseCard
           key={exercise.id}
@@ -127,17 +136,74 @@ function ExerciseCard({
   }
 
   return (
-    <div>
-      <h3>{exerciseDefinitionName}</h3>
+    <div
+      style={{
+        border: '1px solid #d6d6d6',
+        borderRadius: '12px',
+        padding: '12px',
+        background: '#f9f9f9',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '8px',
+        }}
+      >
+        <div>
+          <h3 style={{ margin: 0 }}>{exerciseDefinitionName}</h3>
+          <div style={{ fontSize: '0.85rem', color: '#555' }}>
+            Work weight
+          </div>
+        </div>
+        {isEditingWeight ? null : (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setIsEditingWeight(true)}
+              aria-label="Edit work weight"
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #c9c9c9',
+                borderRadius: '10px',
+                background: '#ffffff',
+                minHeight: '44px',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>
+                {workWeight != null
+                  ? `${workWeight} ${unit}`
+                  : '—'}
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setShowCalculator(current => !current)
+              }
+              aria-label="Toggle plate calculator"
+              style={{
+                marginLeft: '8px',
+                minHeight: '44px',
+                padding: '8px 12px',
+              }}
+            >
+              Plates
+            </button>
+          </div>
+        )}
+      </div>
       {isEditingWeight ? (
         <div
           style={{
-            display: 'inline-block',
-            padding: '6px 10px',
+            padding: '10px',
             border: '1px solid #c9c9c9',
-            borderRadius: '6px',
-            background: '#f7f7f7',
-            marginBottom: '8px',
+            borderRadius: '10px',
+            background: '#ffffff',
+            marginBottom: '12px',
           }}
         >
           <label>
@@ -176,40 +242,7 @@ function ExerciseCard({
           </div>
         </div>
       ) : (
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsEditingWeight(true)}
-            aria-label="Edit work weight"
-            style={{
-              display: 'inline-block',
-              padding: '6px 10px',
-              border: '1px solid #c9c9c9',
-              borderRadius: '6px',
-              background: '#f7f7f7',
-              marginBottom: '8px',
-            }}
-          >
-            <div style={{ fontSize: '0.85rem' }}>
-              Work weight
-            </div>
-            <div style={{ fontWeight: 600 }}>
-              {workWeight != null
-                ? `${workWeight} ${unit}`
-                : '—'}
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setShowCalculator(current => !current)
-            }
-            aria-label="Toggle plate calculator"
-            style={{ marginLeft: '8px' }}
-          >
-            Plates
-          </button>
-        </div>
+        <div />
       )}
       {showCalculator && (
         <PlateCalculatorPanel
@@ -220,16 +253,24 @@ function ExerciseCard({
           onClose={() => setShowCalculator(false)}
         />
       )}
-      {orderedSets.map((set, index) => (
-        <SetRow
-          key={set.id}
-          index={index}
-          targetReps={set.targetReps}
-          status={set.status}
-          actualReps={set.actualReps}
-          onTap={() => onSetTap(set.id)}
-        />
-      ))}
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          flexWrap: 'wrap',
+        }}
+      >
+        {orderedSets.map((set, index) => (
+          <SetRow
+            key={set.id}
+            index={index}
+            targetReps={set.targetReps}
+            status={set.status}
+            actualReps={set.actualReps}
+            onTap={() => onSetTap(set.id)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -253,12 +294,37 @@ function SetRow({
     status === 'pending'
       ? targetReps
       : actualReps ?? targetReps
+  const isPending = status === 'pending'
 
   return (
-    <button type="button" onClick={onTap}>
-      <div>Set {index + 1}</div>
-      <div>Reps: {repsDisplay}</div>
-      <div>Status: {status}</div>
+    <button
+      type="button"
+      onClick={onTap}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '10px 12px',
+        borderRadius: '10px',
+        border: isPending
+          ? '1px dashed #cfcfcf'
+          : '1px solid #e2e2e2',
+        background: isPending ? '#f6f6f6' : '#ffffff',
+        minHeight: '48px',
+        minWidth: '52px',
+      }}
+      aria-label={`Set ${index + 1}`}
+    >
+      <div
+        style={{
+          fontSize: '1.1rem',
+          fontWeight: isPending ? 500 : 700,
+          color: isPending ? '#888' : '#111',
+          opacity: isPending ? 0.7 : 1,
+        }}
+      >
+        {repsDisplay}
+      </div>
     </button>
   )
 }
@@ -390,6 +456,8 @@ function PlateCalculatorPanel({
         border: '1px solid #d4d4d4',
         padding: '10px',
         marginBottom: '12px',
+        borderRadius: '10px',
+        background: '#ffffff',
       }}
     >
       <div>

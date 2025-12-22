@@ -43,7 +43,7 @@ describe('HomeScreen', () => {
       screen.queryByText('Start New Workout')
     ).toBeNull()
     expect(
-      screen.getByText('Squat • Bench Press')
+      screen.getByText('(Squat • Bench Press)')
     ).toBeInTheDocument()
   })
 

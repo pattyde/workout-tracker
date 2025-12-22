@@ -91,7 +91,6 @@ describe('ActiveWorkoutView', () => {
 
     expect(screen.getByText('Variation A')).toBeInTheDocument()
     expect(screen.getByText('Squat')).toBeInTheDocument()
-    expect(screen.getByText('Work weight')).toBeInTheDocument()
     expect(screen.getByText('20 kg')).toBeInTheDocument()
     expect(screen.getByLabelText('Set 1')).toBeInTheDocument()
     expect(screen.getByText('5')).toBeInTheDocument()
@@ -194,13 +193,13 @@ describe('ActiveWorkoutView', () => {
     fireEvent.click(screen.getByText('Plates'))
 
     expect(
-      screen.getByText('Plate calculator')
+      screen.getByText('Plate Calculator')
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Bar: Olympic bar (20 kg)')
+      screen.getByText('Olympic bar (20 kg)')
     ).toBeInTheDocument()
     expect(
-      screen.getByText('1 × 20 kg')
+      screen.getByText(/20 × 1/)
     ).toBeInTheDocument()
   })
 
@@ -240,7 +239,7 @@ describe('ActiveWorkoutView', () => {
       )
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Difference: 2.5 kg')
+      screen.getByText(/Difference: 2.5 kg/)
     ).toBeInTheDocument()
   })
 

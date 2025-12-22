@@ -84,13 +84,17 @@ describe('WorkoutLifecycleService', () => {
       appStateRepo
     )
 
-    expect(workout.id).toBe('w-1')
+    expect(workout.id).toBe(
+      '00000000-0000-0000-0000-000000000001'
+    )
     expect(workout.startedAtMs).toBe(1000)
     expect(workout.dateMs).toBe(1000)
     expect(workout.completed).toBe(false)
     expect(workout.completedAtMs).toBeUndefined()
 
-    expect(appStateRepo.state?.activeWorkoutId).toBe('w-1')
+    expect(appStateRepo.state?.activeWorkoutId).toBe(
+      '00000000-0000-0000-0000-000000000001'
+    )
   })
 
   it('resumes existing active workout', async () => {

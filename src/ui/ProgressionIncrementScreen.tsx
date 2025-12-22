@@ -7,10 +7,7 @@ import type {
 } from '../domain/models/AppState'
 import type { ProgressionStateRepository } from '../data/ProgressionStateRepository'
 import type { AppStateRepository } from '../data/AppStateRepository'
-import {
-  getBarType,
-  listBarTypes,
-} from '../domain/bars/barTypes'
+import { listBarTypes } from '../domain/bars/barTypes'
 import { updateProgressionIncrement } from '../services/progressionIncrementService'
 import { updatePreferredBarType } from '../services/preferredBarService'
 import { getOrInitAppState } from '../services/appStateService'

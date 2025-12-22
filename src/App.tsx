@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ExerciseDefinition } from './domain/models/ExerciseDefinitions'
 import type { ProgressionState } from './domain/models/ProgressionState'
 import type { Workout } from './domain/models/Workout'
-import type { AppState } from './domain/models/AppState'
+import type {
+  AppState,
+  EquipmentInventory,
+} from './domain/models/AppState'
 import { IndexedDbWorkoutRepository } from './data/WorkoutRepositoryIndexedDb'
 import { IndexedDbAppStateRepository } from './data/AppStateRepositoryIndexedDb'
 import { IndexedDbProgressionStateRepository } from './data/ProgressionStateRepositoryIndexedDb'
@@ -67,9 +70,10 @@ function AppBootstrap() {
     () => buildDefinitionMap(STRONGLIFTS_5X5_EXERCISES),
     []
   )
-  const [, setProgressionStates] = useState<
-    Record<string, ProgressionState>
-  >({})
+  const [progressionStates, setProgressionStates] =
+    useState<Record<string, ProgressionState>>({})
+  const [equipmentInventory, setEquipmentInventory] =
+    useState<EquipmentInventory | null>(null)
 
   const [workout, setWorkout] = useState<Workout | null>(
     null
@@ -118,6 +122,9 @@ function AppBootstrap() {
           setActiveStopwatch(
             appState?.activeStopwatch ?? null
           )
+          setEquipmentInventory(
+            appState?.equipmentInventory ?? null
+          )
         }
       } catch (err) {
         if (!cancelled) {
@@ -143,6 +150,39 @@ function AppBootstrap() {
     appStateRepository,
     progressionStateRepository,
   ])
+
+  useEffect(() => {
+    if (view !== 'active') return
+    let cancelled = false
+
+    async function refreshState() {
+      try {
+        const [appState, progressions] =
+          await Promise.all([
+            getOrInitAppState(appStateRepository),
+            progressionStateRepository.listAll(),
+          ])
+        if (!cancelled) {
+          setEquipmentInventory(
+            appState.equipmentInventory ?? null
+          )
+          setProgressionStates(
+            buildProgressionMap(progressions)
+          )
+        }
+      } catch {
+        if (!cancelled) {
+          setEquipmentInventory(null)
+        }
+      }
+    }
+
+    refreshState()
+
+    return () => {
+      cancelled = true
+    }
+  }, [view, appStateRepository, progressionStateRepository])
 
   if (loading) {
     return <div>Loading workout...</div>
@@ -247,6 +287,10 @@ function AppBootstrap() {
       <ActiveWorkoutView
         workout={workout}
         exerciseDefinitions={exerciseDefinitions}
+        progressionStates={progressionStates}
+        equipmentInventory={
+          equipmentInventory ?? { bars: [], plates: [] }
+        }
         onSetTap={async setId => {
           if (!workout) return
           const updated = await applySetTapToWorkout(
@@ -257,8 +301,9 @@ function AppBootstrap() {
             Date.now()
           )
           setWorkout(updated)
-          const appState =
-            await appStateRepository.get()
+          const appState = await getOrInitAppState(
+            appStateRepository
+          )
           setActiveStopwatch(
             appState?.activeStopwatch ?? null
           )

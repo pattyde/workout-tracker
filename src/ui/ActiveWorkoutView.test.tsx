@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { Workout } from '../domain/models/Workout'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
+import type { EquipmentInventory } from '../domain/models/AppState'
+import type { ProgressionState } from '../domain/models/ProgressionState'
 import ActiveWorkoutView from './ActiveWorkoutView'
 
 const DEFINITIONS: Record<string, ExerciseDefinition> = {
@@ -44,12 +46,43 @@ const WORKOUT: Workout = {
   completed: false,
 }
 
+const PROGRESSION_STATES: Record<string, ProgressionState> = {
+  squat: {
+    id: 'p-squat',
+    exerciseDefinitionId: 'squat',
+    currentWeight: 20,
+    failureStreak: 0,
+    plateIncrement: 2.5,
+    unit: 'kg',
+    preferredBarTypeId: 'olympic-20kg',
+  },
+}
+
+const INVENTORY: EquipmentInventory = {
+  bars: [
+    {
+      id: 'olympic-20kg',
+      name: 'Olympic bar',
+      weight: 20,
+      unit: 'kg',
+      enabled: true,
+    },
+  ],
+  plates: [
+    { weight: 20, unit: 'kg', quantity: 2 },
+    { weight: 10, unit: 'kg', quantity: 2 },
+    { weight: 5, unit: 'kg', quantity: 2 },
+  ],
+}
+
 describe('ActiveWorkoutView', () => {
   it('renders variation and exercises', () => {
     render(
       <ActiveWorkoutView
         workout={WORKOUT}
         exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -71,6 +104,8 @@ describe('ActiveWorkoutView', () => {
       <ActiveWorkoutView
         workout={WORKOUT}
         exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -91,6 +126,8 @@ describe('ActiveWorkoutView', () => {
       <ActiveWorkoutView
         workout={WORKOUT}
         exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -111,6 +148,8 @@ describe('ActiveWorkoutView', () => {
       <ActiveWorkoutView
         workout={WORKOUT}
         exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
         onSetTap={handleTap}
         onWorkWeightSave={() => {}}
       />
@@ -118,5 +157,96 @@ describe('ActiveWorkoutView', () => {
 
     fireEvent.click(screen.getByText('Set 1'))
     expect(handleTap).toHaveBeenCalledWith('set-1')
+  })
+
+  it('opens the plate calculator and shows plates', () => {
+    const workout: Workout = {
+      ...WORKOUT,
+      exerciseInstances: [
+        {
+          ...WORKOUT.exerciseInstances[0],
+          workWeight: 60,
+        },
+      ],
+    }
+
+    render(
+      <ActiveWorkoutView
+        workout={workout}
+        exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
+        onSetTap={() => {}}
+        onWorkWeightSave={() => {}}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Plates'))
+
+    expect(
+      screen.getByText('Plate calculator')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Bar: Olympic bar (20 kg)')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('1 × 20 kg')
+    ).toBeInTheDocument()
+  })
+
+  it('shows a warning when exact weight is not achievable', () => {
+    const workout: Workout = {
+      ...WORKOUT,
+      exerciseInstances: [
+        {
+          ...WORKOUT.exerciseInstances[0],
+          workWeight: 62.5,
+        },
+      ],
+    }
+
+    render(
+      <ActiveWorkoutView
+        workout={workout}
+        exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
+        onSetTap={() => {}}
+        onWorkWeightSave={() => {}}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Plates'))
+
+    expect(
+      screen.getByText(
+        /Target weight cannot be loaded exactly/
+      )
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Difference: 2.5 kg')
+    ).toBeInTheDocument()
+  })
+
+  it('does not modify workout state when viewing the calculator', () => {
+    const handleSave = vi.fn()
+    const handleTap = vi.fn()
+
+    render(
+      <ActiveWorkoutView
+        workout={WORKOUT}
+        exerciseDefinitions={DEFINITIONS}
+        progressionStates={PROGRESSION_STATES}
+        equipmentInventory={INVENTORY}
+        onSetTap={handleTap}
+        onWorkWeightSave={handleSave}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Plates'))
+    fireEvent.click(screen.getByText('Close'))
+
+    expect(handleSave).not.toHaveBeenCalled()
+    expect(handleTap).not.toHaveBeenCalled()
   })
 })

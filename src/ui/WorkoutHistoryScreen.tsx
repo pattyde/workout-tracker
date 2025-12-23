@@ -353,18 +353,33 @@ function WorkoutSummaryRow({
     >
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          width: '100%',
+          columnGap: '12px',
           alignItems: 'center',
-          gap: '12px',
           fontSize: '0.9rem',
           color: '#666',
         }}
       >
-        <div>{`Workout ${workout.variation}`}</div>
-        <div>{completedAt}</div>
+        <div style={{ minWidth: 0 }}>{`Workout ${workout.variation}`}</div>
+        <div
+          style={{
+            whiteSpace: 'nowrap',
+            textAlign: 'right',
+            justifySelf: 'end',
+          }}
+        >
+          {completedAt}
+        </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+        }}
+      >
         {workout.exerciseInstances.map((exercise, index) => {
           const definition =
             exerciseDefinitions[exercise.exerciseDefinitionId]
@@ -378,8 +393,10 @@ function WorkoutSummaryRow({
             <div
               key={exercise.id}
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                width: '100%',
+                columnGap: '12px',
                 alignItems: 'center',
                 paddingTop: index === 0 ? 0 : '8px',
                 marginTop: index === 0 ? 0 : '8px',
@@ -387,8 +404,17 @@ function WorkoutSummaryRow({
                   index === 0 ? 'none' : '1px solid #e5e7eb',
               }}
             >
-              <div style={{ fontWeight: 600 }}>{name}</div>
-              <div style={{ color: '#555' }}>
+              <div style={{ fontWeight: 600, minWidth: 0 }}>
+                {name}
+              </div>
+              <div
+                style={{
+                  color: '#555',
+                  whiteSpace: 'nowrap',
+                  textAlign: 'right',
+                  justifySelf: 'end',
+                }}
+              >
                 {scheme}{' '}
                 {weight != null ? `${weight} ${unit}` : '—'}
               </div>
@@ -505,83 +531,92 @@ function WorkoutDetailsView({
     >
       <div
         style={{
-          position: 'relative',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           minHeight: '48px',
+          gap: '12px',
         }}
       >
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back"
-          style={{
-            border: 'none',
-            background: 'transparent',
-            padding: 0,
-            minHeight: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '1rem',
-            color: '#2563EB',
-            cursor: 'pointer',
-          }}
-        >
-          <span
-            aria-hidden="true"
+        <div style={{ minWidth: '96px' }}>
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back"
             style={{
-              fontSize: '1.3rem',
-              lineHeight: 1,
-              marginRight: '4px',
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: '1rem',
+              color: '#2563EB',
+              cursor: 'pointer',
             }}
           >
-            ‹
-          </span>
-          Back
-        </button>
+            <span
+              aria-hidden="true"
+              style={{
+                fontSize: '1.3rem',
+                lineHeight: 1,
+                marginRight: '4px',
+              }}
+            >
+              ‹
+            </span>
+            Back
+          </button>
+        </div>
         <div
           style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
+            flex: '1 1 auto',
             textAlign: 'center',
             fontSize: '1.2rem',
             fontWeight: 600,
             color: '#111827',
-            pointerEvents: 'none',
           }}
         >
           Workout {workout.variation}
+        </div>
+        <div
+          style={{
+            minWidth: '96px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label="Edit workout"
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                minHeight: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '1rem',
+                color: '#2563EB',
+                cursor: 'pointer',
+              }}
+            >
+              <span aria-hidden="true">✎</span>
+              Edit
+            </button>
+          )}
         </div>
       </div>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
         }}
       >
         <div style={{ color: '#666' }}>{completedAt}</div>
-        {!isEditing && (
-          <Button
-            variant="secondary"
-            onClick={onEdit}
-            aria-label="Edit workout"
-            style={{
-              minHeight: '48px',
-              padding: '0 12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '1rem',
-              lineHeight: 1,
-            }}
-          >
-            <span aria-hidden="true">✎</span>
-            Edit Workout
-          </Button>
-        )}
       </div>
       {orderedExercises.map(exercise => {
         const name =

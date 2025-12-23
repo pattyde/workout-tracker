@@ -340,7 +340,6 @@ function WorkoutSummaryRow({
         WebkitAppearance: 'none',
         color: 'inherit',
         font: 'inherit',
-        background: 'transparent',
         border: '1px solid #d6d6d6',
         borderRadius: '12px',
         padding: '16px',

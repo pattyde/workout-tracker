@@ -289,13 +289,6 @@ function AppBootstrap() {
           padding: '0 16px',
         }}
       >
-        <Button
-          variant="secondary"
-          onClick={() => setView('home')}
-          style={{ width: '100%' }}
-        >
-          Back
-        </Button>
         {activeStopwatch?.startTime != null &&
           !activeStopwatch.dismissed && (
             <StopwatchDisplay
@@ -346,6 +339,7 @@ function AppBootstrap() {
           )
           setWorkout(updated)
         }}
+        onBack={() => setView('home')}
         onSetTap={async setId => {
           if (!workout) return
           const updated = await applySetTapToWorkout(

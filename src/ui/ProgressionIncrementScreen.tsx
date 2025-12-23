@@ -141,10 +141,57 @@ export default function ProgressionIncrementScreen({
         margin: '0 auto',
       }}
     >
-      <Button variant="secondary" onClick={onBack}>
-        Back
-      </Button>
-      <h2 style={{ margin: 0 }}>Exercise Settings</h2>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          minHeight: '48px',
+        }}
+      >
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            minHeight: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '1rem',
+            color: '#2563EB',
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: '1.3rem',
+              lineHeight: 1,
+              marginRight: '4px',
+            }}
+          >
+            ‹
+          </span>
+          Back
+        </button>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            fontWeight: 600,
+            color: '#111827',
+            pointerEvents: 'none',
+          }}
+        >
+          Settings
+        </div>
+      </div>
       {progressions.map(progression => {
         const definition =
           exerciseDefinitions[progression.exerciseDefinitionId]

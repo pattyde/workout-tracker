@@ -178,13 +178,58 @@ export default function WorkoutHistoryScreen({
           margin: '0 auto',
         }}
       >
-        <Button
-          variant="secondary"
-          onClick={onBack}
-          style={{ width: '100%', marginBottom: '16px' }}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            minHeight: '48px',
+            marginBottom: '16px',
+          }}
         >
-          Back
-        </Button>
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back"
+            style={{
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: '1rem',
+              color: '#2563EB',
+              cursor: 'pointer',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                fontSize: '1.3rem',
+                lineHeight: 1,
+                marginRight: '4px',
+              }}
+            >
+              ‹
+            </span>
+            Back
+          </button>
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+              fontSize: '1.2rem',
+              fontWeight: 600,
+              color: '#111827',
+              pointerEvents: 'none',
+            }}
+          >
+            History
+          </div>
+        </div>
         <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>
           No completed workouts yet
         </div>
@@ -207,10 +252,57 @@ export default function WorkoutHistoryScreen({
         margin: '0 auto',
       }}
     >
-      <Button variant="secondary" onClick={onBack} style={{ width: '100%' }}>
-        Back
-      </Button>
-      <h2 style={{ margin: 0 }}>Workout History</h2>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          minHeight: '48px',
+        }}
+      >
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            minHeight: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '1rem',
+            color: '#2563EB',
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: '1.3rem',
+              lineHeight: 1,
+              marginRight: '4px',
+            }}
+          >
+            ‹
+          </span>
+          Back
+        </button>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            fontWeight: 600,
+            color: '#111827',
+            pointerEvents: 'none',
+          }}
+        >
+          History
+        </div>
+      </div>
       {workouts.map(workout => (
         <WorkoutSummaryRow
           key={workout.id}
@@ -409,56 +501,83 @@ function WorkoutDetailsView({
     >
       <div
         style={{
+          position: 'relative',
           display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          minHeight: '48px',
         }}
       >
-        <Button
-          variant="secondary"
+        <button
+          type="button"
           onClick={onBack}
-          style={{ width: '100%' }}
-        >
-          Back
-        </Button>
-      </div>
-      <div>
-        <div
+          aria-label="Back"
           style={{
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            minHeight: '48px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
+            fontSize: '1rem',
+            color: '#2563EB',
+            cursor: 'pointer',
           }}
         >
-          <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>
-            Workout {workout.variation}
-          </div>
-          {!isEditing && (
-            <Button
-              variant="secondary"
-              onClick={onEdit}
-              aria-label="Edit workout"
-              style={{
-                minHeight: '48px',
-                padding: '0 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '1rem',
-                lineHeight: 1,
-              }}
-            >
-              <span aria-hidden="true">✎</span>
-              Edit Workout
-            </Button>
-          )}
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: '1.3rem',
+              lineHeight: 1,
+              marginRight: '4px',
+            }}
+          >
+            ‹
+          </span>
+          Back
+        </button>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            fontWeight: 600,
+            color: '#111827',
+            pointerEvents: 'none',
+          }}
+        >
+          Workout {workout.variation}
         </div>
-        <div style={{ color: '#666', marginTop: '4px' }}>
-          {completedAt}
-        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+        }}
+      >
+        <div style={{ color: '#666' }}>{completedAt}</div>
+        {!isEditing && (
+          <Button
+            variant="secondary"
+            onClick={onEdit}
+            aria-label="Edit workout"
+            style={{
+              minHeight: '48px',
+              padding: '0 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '1rem',
+              lineHeight: 1,
+            }}
+          >
+            <span aria-hidden="true">✎</span>
+            Edit Workout
+          </Button>
+        )}
       </div>
       {orderedExercises.map(exercise => {
         const name =

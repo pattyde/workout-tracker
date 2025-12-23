@@ -84,6 +84,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -107,6 +108,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -130,6 +132,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={handleSave}
       />
@@ -153,6 +156,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={handleTap}
         onWorkWeightSave={() => {}}
       />
@@ -185,6 +189,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -226,6 +231,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />
@@ -254,6 +260,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={() => {}}
+        onBack={() => {}}
         onSetTap={handleTap}
         onWorkWeightSave={handleSave}
       />
@@ -276,6 +283,7 @@ describe('ActiveWorkoutView', () => {
         progressionStates={PROGRESSION_STATES}
         equipmentInventory={INVENTORY}
         onVariationChange={handleChange}
+        onBack={() => {}}
         onSetTap={() => {}}
         onWorkWeightSave={() => {}}
       />

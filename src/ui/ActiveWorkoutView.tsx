@@ -14,6 +14,7 @@ interface ActiveWorkoutViewProps {
   progressionStates: Record<string, ProgressionState>
   equipmentInventory: EquipmentInventory
   onVariationChange: (variation: Workout['variation']) => void
+  onBack: () => void
   onSetTap: (setId: string) => void
   onWorkWeightSave: (
     exerciseInstanceId: string,
@@ -27,6 +28,7 @@ export default function ActiveWorkoutView({
   progressionStates,
   equipmentInventory,
   onVariationChange,
+  onBack,
   onSetTap,
   onWorkWeightSave,
 }: ActiveWorkoutViewProps) {
@@ -49,6 +51,7 @@ export default function ActiveWorkoutView({
       <VariationHeader
         currentVariation={workout.variation}
         onConfirmChange={onVariationChange}
+        onBack={onBack}
       />
       {orderedExercises.map(exercise => (
         <ExerciseCard
@@ -405,11 +408,13 @@ function SetRow({
 interface VariationHeaderProps {
   currentVariation: Workout['variation']
   onConfirmChange: (variation: Workout['variation']) => void
+  onBack: () => void
 }
 
 function VariationHeader({
   currentVariation,
   onConfirmChange,
+  onBack,
 }: VariationHeaderProps) {
   const [isChanging, setIsChanging] = useState(false)
   const [selected, setSelected] =
@@ -435,33 +440,76 @@ function VariationHeader({
     <div>
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
+          minHeight: '48px',
         }}
       >
-        <h2 style={{ margin: 0 }}>
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            minHeight: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '1rem',
+            color: '#2563EB',
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: '1.3rem',
+              lineHeight: 1,
+              marginRight: '4px',
+            }}
+          >
+            ‹
+          </span>
+          Back
+        </button>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            fontWeight: 600,
+            color: '#111827',
+            pointerEvents: 'none',
+          }}
+        >
           Workout {currentVariation}
-        </h2>
+        </div>
         {!isChanging && (
-          <Button
-            variant="secondary"
+          <button
+            type="button"
             onClick={() => setIsChanging(true)}
             aria-label="Edit workout"
             style={{
+              marginLeft: 'auto',
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
               minHeight: '48px',
-              padding: '0 12px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               fontSize: '1rem',
-              lineHeight: 1,
+              color: '#2563EB',
+              cursor: 'pointer',
             }}
           >
             <span aria-hidden="true">✎</span>
-            Edit Workout
-          </Button>
+            Edit
+          </button>
         )}
       </div>
       {isChanging && (

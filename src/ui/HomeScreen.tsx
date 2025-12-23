@@ -36,7 +36,7 @@ export default function HomeScreen({
         }}
       >
         <div style={{ textAlign: 'center' }}>
-          <h1 style={{ margin: 0 }}>Workout Tracker</h1>
+          <h1 style={{ margin: 0 }}>5x5 Tracker</h1>
         </div>
         {/* no workout-in-progress card */}
         <div

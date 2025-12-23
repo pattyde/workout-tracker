@@ -1,4 +1,4 @@
-# Workout Tracker
+# 5x5 Tracker
 
 A client-only workout tracking application with progressive overload based on 5x5 logic.
 

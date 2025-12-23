@@ -19,7 +19,7 @@ describe('App', () => {
   it('renders the app', async () => {
     render(<App />)
     expect(
-      await screen.findByText('Workout Tracker')
+      await screen.findByText('5x5 Tracker')
     ).toBeInTheDocument()
   })
 })

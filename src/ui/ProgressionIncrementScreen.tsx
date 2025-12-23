@@ -223,30 +223,48 @@ export default function ProgressionIncrementScreen({
               <span style={{ fontSize: '0.85rem', color: '#555' }}>
                 Preferred bar
               </span>
-              <select
-                value={barDraft}
-                onChange={event => {
-                  const selected = event.target.value
-                  setBarDrafts(current => ({
-                    ...current,
-                    [progression.exerciseDefinitionId]: selected,
-                  }))
-                }}
-                style={{
-                  minHeight: '48px',
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff',
-                }}
-              >
-                {listBarTypes().map(bar => (
-                  <option key={bar.id} value={bar.id}>
-                    {bar.name} ({bar.weight} {bar.unit})
-                  </option>
-                ))}
-              </select>
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={barDraft}
+                  onChange={event => {
+                    const selected = event.target.value
+                    setBarDrafts(current => ({
+                      ...current,
+                      [progression.exerciseDefinitionId]: selected,
+                    }))
+                  }}
+                  style={{
+                    minHeight: '48px',
+                    width: '100%',
+                    padding: '10px 40px 10px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid #d1d5db',
+                    background: '#ffffff',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                  }}
+                >
+                  {listBarTypes().map(bar => (
+                    <option key={bar.id} value={bar.id}>
+                      {bar.name} ({bar.weight} {bar.unit})
+                    </option>
+                  ))}
+                </select>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#6b7280',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  ▾
+                </span>
+              </div>
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '0.85rem', color: '#555' }}>

@@ -74,6 +74,7 @@ describe('equipment inventory', () => {
     )
     expect(enabledBars.map(bar => bar.id)).toEqual([
       'olympic-20kg',
+      'technique-7.5kg',
     ])
   })
 

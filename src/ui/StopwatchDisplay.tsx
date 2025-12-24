@@ -83,7 +83,6 @@ export function StopwatchDisplay({
           gap: '12px',
           minHeight: '48px',
           width: '100%',
-          maxWidth: '360px',
           justifyContent: 'space-between',
           pointerEvents: 'auto',
         }}

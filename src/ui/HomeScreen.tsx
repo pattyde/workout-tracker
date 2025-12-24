@@ -104,7 +104,6 @@ export default function HomeScreen({
                 onClick={onResume}
                 style={{
                   width: '100%',
-                  maxWidth: '360px',
                   minHeight: '52px',
                 }}
               >
@@ -117,7 +116,6 @@ export default function HomeScreen({
               onClick={onStartNew}
               style={{
                 width: '100%',
-                maxWidth: '360px',
                 minHeight: '52px',
               }}
             >

@@ -166,6 +166,48 @@ describe('workout history service', () => {
     expect(updatedSet.actualReps).toBe(5)
   })
 
+  it('persists updated workout date when edited', async () => {
+    const workoutRepo = new MemoryWorkoutRepository()
+    const progressionRepo =
+      new MemoryProgressionStateRepository()
+    const appStateRepo = new MemoryAppStateRepository()
+
+    const workout = makeWorkout({
+      dateMs: 1000,
+      completedAtMs: 2000,
+    })
+    await workoutRepo.save(workout)
+    await progressionRepo.save({
+      id: 'p1',
+      exerciseDefinitionId: 'squat',
+      currentWeight: 100,
+      failureStreak: 0,
+      plateIncrement: 2.5,
+      unit: 'kg',
+    })
+
+    const updated = {
+      ...workout,
+      dateMs: 5000,
+      completedAtMs: 5000,
+    }
+
+    const result = await updateCompletedWorkout({
+      workoutId: workout.id,
+      updatedWorkout: updated,
+      workoutRepository: workoutRepo,
+      progressionStateRepository: progressionRepo,
+      appStateRepository: appStateRepo,
+    })
+
+    expect(result.completedAtMs).toBe(5000)
+    expect(result.dateMs).toBe(5000)
+
+    const stored = await workoutRepo.getById(workout.id)
+    expect(stored?.completedAtMs).toBe(5000)
+    expect(stored?.dateMs).toBe(5000)
+  })
+
   it('marks a workout as deleted', async () => {
     const workoutRepo = new MemoryWorkoutRepository()
     const progressionRepo =

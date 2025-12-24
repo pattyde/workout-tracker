@@ -138,6 +138,8 @@ function applyEditableSetUpdates(
 
   return {
     ...base,
+    completedAtMs: updated.completedAtMs ?? base.completedAtMs,
+    dateMs: updated.dateMs ?? base.dateMs,
     exerciseInstances,
   }
 }

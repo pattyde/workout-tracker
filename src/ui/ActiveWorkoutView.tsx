@@ -200,20 +200,19 @@ function ExerciseCard({
                   : '—'}
               </div>
             </button>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={() =>
                 setShowCalculator(current => !current)
               }
               aria-label="Toggle plate calculator"
               style={{
                 marginLeft: '8px',
-                minHeight: '44px',
-                padding: '8px 12px',
+                fontWeight: 500,
               }}
             >
               Plates
-            </button>
+            </Button>
           </div>
         )}
       </div>

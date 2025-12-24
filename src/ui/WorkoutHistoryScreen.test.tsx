@@ -156,7 +156,7 @@ describe('WorkoutHistoryScreen', () => {
       await screen.findByText('Workout A')
     ).toBeInTheDocument()
     expect(screen.getByText('Squat')).toBeInTheDocument()
-    expect(screen.getByText('1×5 60 kg')).toBeInTheDocument()
+    expect(screen.getByText('1x5 @ 60 kg')).toBeInTheDocument()
     expect(
       screen.queryByText('Workout B')
     ).toBeNull()

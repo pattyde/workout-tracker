@@ -391,7 +391,7 @@ function WorkoutSummaryRow({
             exerciseDefinitions[exercise.exerciseDefinitionId]
           const name = definition?.name ?? 'Unknown Exercise'
           const unit = definition?.defaultUnit ?? 'kg'
-          const scheme = getSetScheme(exercise.sets)
+          const scheme = getAchievedRepsSummary(exercise.sets)
           const weight =
             getExerciseWorkWeight(exercise) ??
             exercise.sets[0]?.targetWeight
@@ -421,8 +421,7 @@ function WorkoutSummaryRow({
                   justifySelf: 'end',
                 }}
               >
-                {scheme}{' '}
-                {weight != null ? `${weight} ${unit}` : '—'}
+                {scheme} @ {weight != null ? `${weight} ${unit}` : '—'}
               </div>
             </div>
           )
@@ -432,10 +431,22 @@ function WorkoutSummaryRow({
   )
 }
 
-function getSetScheme(sets: Workout['exerciseInstances'][number]['sets']): string {
-  const setCount = sets.length
-  const reps = sets[0]?.targetReps ?? 0
-  return `${setCount}×${reps}`
+function getAchievedRepsSummary(
+  sets: Workout['exerciseInstances'][number]['sets']
+): string {
+  const workSets = sets.filter(set => set.type === 'work')
+  if (workSets.length === 0) return '—'
+  const reps = workSets.map(set => {
+    if (set.status !== 'completed') return 0
+    return typeof set.actualReps === 'number'
+      ? set.actualReps
+      : 0
+  })
+  const allSame = reps.every(rep => rep === reps[0])
+  if (allSame) {
+    return `${reps.length}x${reps[0] ?? 0}`
+  }
+  return reps.join('/')
 }
 
 function formatWorkoutDate(timestampMs: number): string {

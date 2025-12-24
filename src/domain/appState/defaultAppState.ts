@@ -10,15 +10,18 @@ export function createDefaultEquipmentInventory(): EquipmentInventory {
     name: bar.name,
     weight: bar.weight,
     unit: bar.unit,
-    enabled: bar.id === 'olympic-20kg',
+    enabled:
+      bar.id === 'olympic-20kg' ||
+      bar.id === 'technique-7.5kg',
   }))
 
   const plates = [
-    { weight: 20, unit: 'kg' as const, quantity: 2 },
-    { weight: 10, unit: 'kg' as const, quantity: 2 },
-    { weight: 5, unit: 'kg' as const, quantity: 2 },
-    { weight: 2.5, unit: 'kg' as const, quantity: 2 },
-    { weight: 1.25, unit: 'kg' as const, quantity: 2 },
+    { weight: 20, unit: 'kg' as const, quantity: 4 },
+    { weight: 15, unit: 'kg' as const, quantity: 2 },
+    { weight: 10, unit: 'kg' as const, quantity: 4 },
+    { weight: 5, unit: 'kg' as const, quantity: 4 },
+    { weight: 2.5, unit: 'kg' as const, quantity: 4 },
+    { weight: 1.25, unit: 'kg' as const, quantity: 4 },
     { weight: 0.625, unit: 'kg' as const, quantity: 2 },
   ]
 

@@ -15,7 +15,7 @@ export interface PlateCalculatorConfig {
   /** Minimum plate weight to consider or display (e.g., 0.625kg) */
   minimumPlateWeight: number
 
-  /** Rounding increment for target weights (e.g., 0.5kg or 1lb) */
+  /** Rounding increment for target weights (e.g., 0.625kg or 1lb) */
   roundingIncrement: number
 
   /** Unit of measurement */

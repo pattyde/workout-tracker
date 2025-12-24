@@ -107,6 +107,12 @@ export default function WorkoutHistoryScreen({
             )
           )
         }}
+        onDateChange={updatedMs => {
+          if (!draftWorkout) return
+          setDraftWorkout(
+            updateWorkoutDateInWorkout(draftWorkout, updatedMs)
+          )
+        }}
         onSetTap={setId => {
           if (!draftWorkout) return
           setDraftWorkout(
@@ -466,6 +472,7 @@ interface WorkoutDetailsViewProps {
     exerciseInstanceId: string,
     workWeight: number
   ) => void
+  onDateChange: (updatedMs: number) => void
   isEditing: boolean
 }
 
@@ -479,6 +486,7 @@ function WorkoutDetailsView({
   onDelete,
   onSetTap,
   onWorkWeightChange,
+  onDateChange,
   isEditing,
 }: WorkoutDetailsViewProps) {
   const completedAt = workout.completedAtMs
@@ -487,6 +495,9 @@ function WorkoutDetailsView({
   const orderedExercises = [...workout.exerciseInstances].sort(
     (a, b) => a.orderIndex - b.orderIndex
   )
+  const dateForInput = workout.completedAtMs
+    ? formatDateInputValue(workout.completedAtMs)
+    : formatDateInputValue(workout.dateMs)
   const [editingExerciseId, setEditingExerciseId] =
     useState<string | null>(null)
   const [draftWorkWeight, setDraftWorkWeight] = useState('')
@@ -616,7 +627,31 @@ function WorkoutDetailsView({
           alignItems: 'center',
         }}
       >
-        <div style={{ color: '#666' }}>{completedAt}</div>
+        {isEditing ? (
+          <input
+            type="date"
+            aria-label="Workout date"
+            value={dateForInput}
+            onChange={event => {
+              const nextMs = mergeDateKeepingTime(
+                workout.completedAtMs ?? workout.dateMs,
+                event.target.value
+              )
+              if (!Number.isFinite(nextMs)) return
+              onDateChange(nextMs)
+            }}
+            style={{
+              minHeight: '48px',
+              padding: '8px 10px',
+              borderRadius: '10px',
+              border: '1px solid #cbd5f6',
+              fontSize: '1rem',
+              color: '#111827',
+            }}
+          />
+        ) : (
+          <div style={{ color: '#666' }}>{completedAt}</div>
+        )}
       </div>
       {orderedExercises.map(exercise => {
         const name =
@@ -908,6 +943,40 @@ function updateWorkWeightInWorkout(
     ...workout,
     exerciseInstances,
   }
+}
+
+function updateWorkoutDateInWorkout(
+  workout: Workout,
+  completedAtMs: number
+): Workout {
+  return {
+    ...workout,
+    completedAtMs,
+    dateMs: completedAtMs,
+  }
+}
+
+function formatDateInputValue(timestampMs: number): string {
+  const date = new Date(timestampMs)
+  if (Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function mergeDateKeepingTime(
+  baseMs: number,
+  dateValue: string
+): number {
+  const base = new Date(baseMs)
+  if (Number.isNaN(base.getTime())) return NaN
+  const [year, month, day] = dateValue
+    .split('-')
+    .map(Number)
+  if (!year || !month || !day) return NaN
+  base.setFullYear(year, month - 1, day)
+  return base.getTime()
 }
 
 interface WorkoutDetailsSetTileProps {

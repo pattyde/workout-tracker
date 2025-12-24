@@ -19,7 +19,7 @@ export function createDefaultEquipmentInventory(): EquipmentInventory {
     { weight: 5, unit: 'kg' as const, quantity: 2 },
     { weight: 2.5, unit: 'kg' as const, quantity: 2 },
     { weight: 1.25, unit: 'kg' as const, quantity: 2 },
-    { weight: 0.5, unit: 'kg' as const, quantity: 2 },
+    { weight: 0.625, unit: 'kg' as const, quantity: 2 },
   ]
 
   return {

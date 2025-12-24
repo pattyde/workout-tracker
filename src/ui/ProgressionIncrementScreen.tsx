@@ -546,7 +546,12 @@ export default function ProgressionIncrementScreen({
             setSaving(false)
           }
         }}
-        style={{ width: '100%', minHeight: '52px' }}
+        style={{
+          width: '100%',
+          minHeight: '52px',
+          background: '#1fc5e7',
+          border: '1px solid #1fc5e7',
+        }}
         disabled={saving}
       >
         {saving ? 'Saving...' : 'Save'}

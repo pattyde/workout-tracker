@@ -15,14 +15,14 @@ interface ButtonProps
 const VARIANT_STYLES: Record<ButtonVariant, CSSProperties> =
   {
     primary: {
-      background: '#2563EB',
+      background: '#0f2549',
       color: '#FFFFFF',
-      border: '1px solid #1D4ED8',
+      border: '1px solid #0f2549',
     },
     secondary: {
       background: '#F3F4F6',
       color: '#111827',
-      border: '1px solid #D1D5DB',
+      border: '1px solid #0f2549',
     },
     success: {
       background: '#16A34A',

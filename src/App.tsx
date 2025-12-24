@@ -271,11 +271,7 @@ function AppBootstrap() {
         <Button
           variant="secondary"
           onClick={() => setView('home')}
-          style={{
-            width: '100%',
-            background: '#1fc5e7',
-            border: '1px solid #1fc5e7',
-          }}
+          style={{ width: '100%' }}
         >
           Back
         </Button>

@@ -768,11 +768,7 @@ function WorkoutDetailsView({
           <Button
             variant="primary"
             onClick={onSave}
-            style={{
-              width: '100%',
-              background: '#1fc5e7',
-              border: '1px solid #1fc5e7',
-            }}
+            style={{ width: '100%' }}
           >
             Save changes
           </Button>

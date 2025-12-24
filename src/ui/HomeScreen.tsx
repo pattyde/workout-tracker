@@ -70,7 +70,7 @@ export default function HomeScreen({
           bottom: 0,
           padding: '12px 16px',
           paddingBottom:
-            'calc(12px + env(safe-area-inset-bottom))',
+            'calc(25px + env(safe-area-inset-bottom))',
           background: '#ffffff',
           borderTop: '1px solid #e5e7eb',
         }}
@@ -105,8 +105,6 @@ export default function HomeScreen({
                 style={{
                   width: '100%',
                   minHeight: '52px',
-                  background: '#1fc5e7',
-                  border: '1px solid #1fc5e7',
                 }}
               >
                 Resume Workout
@@ -119,8 +117,6 @@ export default function HomeScreen({
               style={{
                 width: '100%',
                 minHeight: '52px',
-                background: '#1fc5e7',
-                border: '1px solid #1fc5e7',
               }}
             >
               Start New Workout

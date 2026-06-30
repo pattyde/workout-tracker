@@ -12,6 +12,9 @@ describe('HomeScreen', () => {
         onStartNew={() => {}}
         onViewHistory={() => {}}
         onViewSettings={() => {}}
+        onViewImportExport={() => {}}
+        deloadRecommended={false}
+        onDeload={() => {}}
       />
     )
 
@@ -30,6 +33,9 @@ describe('HomeScreen', () => {
         onStartNew={() => {}}
         onViewHistory={() => {}}
         onViewSettings={() => {}}
+        onViewImportExport={() => {}}
+        deloadRecommended={false}
+        onDeload={() => {}}
       />
     )
 
@@ -60,6 +66,9 @@ describe('HomeScreen', () => {
         onStartNew={onStartNew}
         onViewHistory={onViewHistory}
         onViewSettings={onViewSettings}
+        onViewImportExport={() => {}}
+        deloadRecommended={false}
+        onDeload={() => {}}
       />
     )
 

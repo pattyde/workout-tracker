@@ -15,7 +15,9 @@ const EXERCISE_NAME_MAP: Record<string, string> = {
 }
 
 function parseTimeToMs(dateMs: number, timeStr: string): number {
-  const [h, m] = timeStr.split(':').map(Number)
+  const parts = timeStr.split(':').map(Number)
+  const h = parts[0] ?? NaN
+  const m = parts[1] ?? NaN
   if (isNaN(h) || isNaN(m)) return dateMs
   const d = new Date(dateMs)
   d.setUTCHours(h, m, 0, 0)
@@ -24,7 +26,10 @@ function parseTimeToMs(dateMs: number, timeStr: string): number {
 
 function parseDateToMs(dateStr: string): number {
   // yyyy/mm/dd
-  const [y, mo, d] = dateStr.split('/').map(Number)
+  const parts = dateStr.split('/').map(Number)
+  const y = parts[0] ?? 0
+  const mo = parts[1] ?? 1
+  const d = parts[2] ?? 1
   return Date.UTC(y, mo - 1, d)
 }
 
@@ -63,7 +68,7 @@ export function parseWorkoutHistoryCSV(csvText: string): ImportResult {
   const text = csvText.replace(/^﻿/, '')
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0)
 
-  const headers = parseCSVLine(lines[0]).map(h => h.trim())
+  const headers = parseCSVLine(lines[0] ?? '').map(h => h.trim())
 
   if (headers.includes('Date (yyyy/mm/dd)')) {
     return parseStrongLiftsFormat(lines, headers)
@@ -89,7 +94,7 @@ function parseStrongLiftsFormat(lines: string[], headers: string[]): ImportResul
   let exerciseRowCount = 0
 
   for (let i = 1; i < lines.length; i++) {
-    const row = parseCSVLine(lines[i])
+    const row = parseCSVLine(lines[i] ?? '')
     const date = col(row, 'Date (yyyy/mm/dd)')
     const workoutNum = col(row, 'Workout')
     if (!date || !workoutNum) continue
@@ -109,7 +114,7 @@ function parseStrongLiftsFormat(lines: string[], headers: string[]): ImportResul
   const workouts: Workout[] = []
 
   for (const [, rows] of sessionMap) {
-    const firstRow = rows[0]
+    const firstRow = rows[0] ?? []
     const dateStr = col(firstRow, 'Date (yyyy/mm/dd)')
     const workoutName = col(firstRow, 'Workout Name')
     const startTimeStr = col(firstRow, 'Start Time (h:mm)')
@@ -129,7 +134,7 @@ function parseStrongLiftsFormat(lines: string[], headers: string[]): ImportResul
 
     const exerciseInstances: ExerciseInstance[] = rows.map((row, orderIndex) => {
       const exerciseId = crypto.randomUUID()
-      const exerciseDefinitionId = EXERCISE_NAME_MAP[col(row, 'Exercise')]
+      const exerciseDefinitionId = EXERCISE_NAME_MAP[col(row, 'Exercise')] ?? ''
 
       const sets: Set[] = []
       let workWeight = 0
@@ -209,7 +214,7 @@ function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
   let exerciseRowCount = 0
 
   for (let i = 1; i < lines.length; i++) {
-    const row = parseCSVLine(lines[i])
+    const row = parseCSVLine(lines[i] ?? '')
     const date = col(row, 'date')
     const variation = col(row, 'variation')
     if (!date || !variation) continue
@@ -231,7 +236,7 @@ function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
   const workouts: Workout[] = []
 
   for (const [sessionKey, exerciseMap] of sessionMap) {
-    const [dateStr, variation] = sessionKey.split('__')
+    const [dateStr = '', variation = 'A'] = sessionKey.split('__')
     // Native date is yyyy-mm-dd (ISO)
     const dateMs = new Date(dateStr).getTime()
     const workoutId = crypto.randomUUID()
@@ -240,7 +245,7 @@ function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
     let orderIndex = 0
 
     for (const [exerciseName, rows] of exerciseMap) {
-      const exerciseDefinitionId = EXERCISE_NAME_MAP[exerciseName]
+      const exerciseDefinitionId = EXERCISE_NAME_MAP[exerciseName] ?? ''
       const sets: Set[] = rows.map(row => {
         const actualRepsRaw = col(row, 'actual_reps')
         const rawStatus = col(row, 'status')

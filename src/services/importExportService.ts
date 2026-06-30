@@ -243,6 +243,11 @@ function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
       const exerciseDefinitionId = EXERCISE_NAME_MAP[exerciseName]
       const sets: Set[] = rows.map(row => {
         const actualRepsRaw = col(row, 'actual_reps')
+        const rawStatus = col(row, 'status')
+        const status: Set['status'] =
+          rawStatus === 'completed' || rawStatus === 'failed' || rawStatus === 'pending'
+            ? rawStatus
+            : 'completed'
         return {
           id: crypto.randomUUID(),
           orderIndex: Number(col(row, 'set_index')) - 1,
@@ -252,7 +257,7 @@ function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
           targetReps: Number(col(row, 'target_reps')),
           actualWeight: Number(col(row, 'weight_kg')),
           actualReps: actualRepsRaw !== '' ? Number(actualRepsRaw) : undefined,
-          status: col(row, 'status') as Set['status'],
+          status,
         }
       })
       sets.sort((a, b) => a.orderIndex - b.orderIndex)
@@ -322,6 +327,7 @@ export function deriveProgressionUpdatesFromWorkouts(
         ...state,
         currentWeight: result.nextWeight,
         failureStreak: result.nextFailureStreak,
+        successStreak: result.nextSuccessStreak,
       }
     }
   }

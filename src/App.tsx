@@ -14,6 +14,7 @@ import {
   STRONGLIFTS_5X5_INITIAL_PROGRESSIONS,
 } from './domain/programs/stronglifts5x5Seed'
 import { startOrResumeWorkout } from './services/startOrResumeWorkoutService'
+import { isDeloadRecommended, applyDeload } from './services/deloadService'
 import ActiveWorkoutView from './ui/ActiveWorkoutView'
 import { applySetTapToWorkout } from './services/setTapService'
 import { StopwatchDisplay } from './ui/StopwatchDisplay'
@@ -92,6 +93,7 @@ function AppBootstrap() {
   const [view, setView] = useState<
     'home' | 'active' | 'history' | 'progression' | 'importExport'
   >('home')
+  const [deloadRecommended, setDeloadRecommended] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -125,6 +127,16 @@ function AppBootstrap() {
           )
           setEquipmentInventory(
             appState?.equipmentInventory ?? null
+          )
+          const allWorkouts = await workoutRepository.listAll()
+          const lastCompletedAtMs = allWorkouts
+            .filter(w => w.completed && !w.deleted && w.completedAtMs !== undefined)
+            .reduce<number | undefined>((max, w) => {
+              const t = w.completedAtMs!
+              return max === undefined || t > max ? t : max
+            }, undefined)
+          setDeloadRecommended(
+            isDeloadRecommended(lastCompletedAtMs, Date.now())
           )
         }
       } catch (err) {
@@ -208,6 +220,7 @@ function AppBootstrap() {
       <HomeScreen
         hasActiveWorkout={Boolean(workout)}
         resumeExerciseNames={resumeExerciseNames}
+        deloadRecommended={deloadRecommended}
         onResume={async () => {
           const activeWorkout = await getActiveWorkout(
             workoutRepository,
@@ -225,6 +238,23 @@ function AppBootstrap() {
             nowMs: Date.now(),
             exerciseDefinitions,
             progressionStates,
+            workoutRepository,
+            appStateRepository,
+          })
+          setWorkout(activeWorkout)
+          setView('active')
+        }}
+        onDeload={async (percentage) => {
+          const updated = applyDeload(progressionStates, percentage)
+          for (const state of Object.values(updated)) {
+            await progressionStateRepository.save(state)
+          }
+          setProgressionStates(updated)
+          setDeloadRecommended(false)
+          const activeWorkout = await startOrResumeWorkout({
+            nowMs: Date.now(),
+            exerciseDefinitions,
+            progressionStates: updated,
             workoutRepository,
             appStateRepository,
           })

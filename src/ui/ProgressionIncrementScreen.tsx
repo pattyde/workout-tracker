@@ -9,6 +9,7 @@ import type { ProgressionStateRepository } from '../data/ProgressionStateReposit
 import type { AppStateRepository } from '../data/AppStateRepository'
 import { listBarTypes } from '../domain/bars/barTypes'
 import { updateProgressionIncrement } from '../services/progressionIncrementService'
+import { updateSuccessesRequired } from '../services/progressionSuccessService'
 import { updatePreferredBarType } from '../services/preferredBarService'
 import { getOrInitAppState } from '../services/appStateService'
 import { updateEquipmentInventory } from '../services/equipmentInventoryService'
@@ -38,6 +39,9 @@ export default function ProgressionIncrementScreen({
     {}
   )
   const [barDrafts, setBarDrafts] = useState<
+    Record<string, string>
+  >({})
+  const [successDrafts, setSuccessDrafts] = useState<
     Record<string, string>
   >({})
   const [equipmentInventory, setEquipmentInventory] =
@@ -80,6 +84,12 @@ export default function ProgressionIncrementScreen({
               'olympic-20kg'
           }
           setBarDrafts(nextBars)
+          const nextSuccess: Record<string, string> = {}
+          for (const progression of all) {
+            nextSuccess[progression.exerciseDefinitionId] =
+              String(progression.successesRequired ?? 1)
+          }
+          setSuccessDrafts(nextSuccess)
           const inventory = appState.equipmentInventory
           if (inventory) {
             setEquipmentInventory(inventory)
@@ -202,6 +212,8 @@ export default function ProgressionIncrementScreen({
         const barDraft =
           barDrafts[progression.exerciseDefinitionId] ??
           'olympic-20kg'
+        const successDraft =
+          successDrafts[progression.exerciseDefinitionId] ?? '1'
 
         return (
           <div
@@ -302,6 +314,45 @@ export default function ProgressionIncrementScreen({
                 />
                 <span style={{ color: '#666', fontSize: '0.95rem' }}>
                   {unit}
+                </span>
+              </div>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#555' }}>
+                Increase weight after
+              </span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  step="1"
+                  value={successDraft}
+                  onChange={event =>
+                    setSuccessDrafts(current => ({
+                      ...current,
+                      [progression.exerciseDefinitionId]:
+                        event.target.value,
+                    }))
+                  }
+                  style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    minHeight: '48px',
+                    width: '80px',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <span style={{ color: '#666', fontSize: '0.95rem' }}>
+                  success(es)
                 </span>
               </div>
             </label>
@@ -482,6 +533,14 @@ export default function ProgressionIncrementScreen({
               await updatePreferredBarType(
                 progression.exerciseDefinitionId,
                 barId,
+                progressionStateRepository
+              )
+              const successesRaw =
+                successDrafts[progression.exerciseDefinitionId] ?? '1'
+              const successesRequired = Math.max(1, Math.round(Number(successesRaw)))
+              await updateSuccessesRequired(
+                progression.exerciseDefinitionId,
+                successesRequired,
                 progressionStateRepository
               )
             }

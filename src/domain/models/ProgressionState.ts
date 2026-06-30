@@ -36,4 +36,10 @@ export interface ProgressionState {
 
   /** Preferred bar type for future workouts (defaults to olympic-20kg) */
   preferredBarTypeId?: string
+
+  /** Number of consecutive successes required before weight increments (default 1) */
+  successesRequired?: number
+
+  /** Consecutive successes accumulated toward the next increment */
+  successStreak?: number
 }

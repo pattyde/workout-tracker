@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -9,7 +10,16 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 export default defineConfig({
   base: '/workout-tracker/',
   // @ts-expect-error - Known type conflict: vitest bundles its own vite version causing plugin type mismatch
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'prompt',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+      },
+      manifest: false,
+    }),
+  ],
   resolve: {
     alias: {
       '@domain': resolve(__dirname, 'src/domain'),

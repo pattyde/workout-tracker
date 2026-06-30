@@ -242,8 +242,14 @@ function AppBootstrap() {
     return (
       <ImportExportScreen
         workoutRepository={workoutRepository}
+        progressionStateRepository={progressionStateRepository}
+        progressionStates={progressionStates}
         exerciseDefinitions={exerciseDefinitions}
-        onBack={() => setView('home')}
+        onBack={async () => {
+          const freshProgressions = await progressionStateRepository.listAll()
+          setProgressionStates(buildProgressionMap(freshProgressions))
+          setView('home')
+        }}
       />
     )
   }

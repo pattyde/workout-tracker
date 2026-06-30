@@ -2,6 +2,9 @@ import type { Workout } from '../domain/models/Workout'
 import type { ExerciseInstance } from '../domain/models/ExerciseInstance'
 import type { Set } from '../domain/models/Set'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
+import type { ProgressionState } from '../domain/models/ProgressionState'
+import { calculateNextProgression } from '../domain/progression/progressionLogic'
+import { getBarWeight } from '../domain/bars/barTypes'
 
 const EXERCISE_NAME_MAP: Record<string, string> = {
   Squat: 'squat',
@@ -179,6 +182,40 @@ export function parseStrongLiftsCSV(csvText: string): ImportResult {
       skippedExercises: [...skippedSet],
     },
   }
+}
+
+export function deriveProgressionUpdatesFromWorkouts(
+  workouts: Workout[],
+  currentProgressionStates: Record<string, ProgressionState>
+): ProgressionState[] {
+  const stateMap: Record<string, ProgressionState> = {}
+  for (const [id, state] of Object.entries(currentProgressionStates)) {
+    stateMap[id] = { ...state }
+  }
+
+  const sorted = [...workouts].sort((a, b) => a.dateMs - b.dateMs)
+
+  for (const workout of sorted) {
+    for (const instance of workout.exerciseInstances) {
+      const state = stateMap[instance.exerciseDefinitionId]
+      if (!state) continue
+
+      const barWeight = getBarWeight(instance.barTypeId)
+      const result = calculateNextProgression(
+        { ...state, currentWeight: instance.workWeight },
+        instance.sets,
+        barWeight
+      )
+
+      stateMap[instance.exerciseDefinitionId] = {
+        ...state,
+        currentWeight: result.nextWeight,
+        failureStreak: result.nextFailureStreak,
+      }
+    }
+  }
+
+  return Object.values(stateMap)
 }
 
 export function exportWorkoutsToCSV(

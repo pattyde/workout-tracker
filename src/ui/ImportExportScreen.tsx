@@ -1,22 +1,29 @@
 import { useRef, useState } from 'react'
 import type { ExerciseDefinition } from '../domain/models/ExerciseDefinitions'
 import type { WorkoutRepository } from '../data/WorkoutRepository'
+import type { ProgressionStateRepository } from '../data/ProgressionStateRepository'
+import type { ProgressionState } from '../domain/models/ProgressionState'
 import type { Workout } from '../domain/models/Workout'
 import {
   parseStrongLiftsCSV,
   exportWorkoutsToCSV,
+  deriveProgressionUpdatesFromWorkouts,
   type ImportPreview,
 } from '../services/importExportService'
 import Button from './Button'
 
 interface ImportExportScreenProps {
   workoutRepository: WorkoutRepository
+  progressionStateRepository: ProgressionStateRepository
+  progressionStates: Record<string, ProgressionState>
   exerciseDefinitions: Record<string, ExerciseDefinition>
   onBack: () => void
 }
 
 export default function ImportExportScreen({
   workoutRepository,
+  progressionStateRepository,
+  progressionStates,
   exerciseDefinitions,
   onBack,
 }: ImportExportScreenProps) {
@@ -58,6 +65,13 @@ export default function ImportExportScreen({
     try {
       for (const workout of pendingWorkouts) {
         await workoutRepository.save(workout)
+      }
+      const progressionUpdates = deriveProgressionUpdatesFromWorkouts(
+        pendingWorkouts,
+        progressionStates
+      )
+      for (const update of progressionUpdates) {
+        await progressionStateRepository.save(update)
       }
       setImportDone(true)
       setPreview(null)

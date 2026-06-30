@@ -58,13 +58,25 @@ export interface ImportResult {
   preview: ImportPreview
 }
 
-export function parseStrongLiftsCSV(csvText: string): ImportResult {
+export function parseWorkoutHistoryCSV(csvText: string): ImportResult {
   // Strip UTF-8 BOM if present
   const text = csvText.replace(/^﻿/, '')
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0)
 
   const headers = parseCSVLine(lines[0]).map(h => h.trim())
 
+  if (headers.includes('Date (yyyy/mm/dd)')) {
+    return parseStrongLiftsFormat(lines, headers)
+  }
+  if (headers.includes('date') && headers.includes('variation')) {
+    return parseNativeFormat(lines, headers)
+  }
+  throw new Error(
+    'Unrecognised CSV format. Please use a file exported from this app or from StrongLifts.'
+  )
+}
+
+function parseStrongLiftsFormat(lines: string[], headers: string[]): ImportResult {
   function col(row: string[], name: string): string {
     const idx = headers.indexOf(name)
     return idx >= 0 ? (row[idx] ?? '').replace(/^"|"$/g, '').trim() : ''
@@ -171,7 +183,106 @@ export function parseStrongLiftsCSV(csvText: string): ImportResult {
     })
   }
 
-  // Sort ascending by date
+  workouts.sort((a, b) => a.dateMs - b.dateMs)
+
+  return {
+    workouts,
+    preview: {
+      workoutCount: workouts.length,
+      exerciseRowCount,
+      skippedExercises: [...skippedSet],
+    },
+  }
+}
+
+// Native app CSV format: date,variation,exercise,set_index,target_reps,actual_reps,weight_kg,status
+function parseNativeFormat(lines: string[], headers: string[]): ImportResult {
+  function col(row: string[], name: string): string {
+    const idx = headers.indexOf(name)
+    return idx >= 0 ? (row[idx] ?? '').replace(/^"|"$/g, '').trim() : ''
+  }
+
+  // Group rows by (date, variation) then by exercise name
+  const sessionMap = new Map<string, Map<string, string[][]>>()
+
+  const skippedSet = new Set<string>()
+  let exerciseRowCount = 0
+
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCSVLine(lines[i])
+    const date = col(row, 'date')
+    const variation = col(row, 'variation')
+    if (!date || !variation) continue
+
+    const exerciseName = col(row, 'exercise')
+    if (!EXERCISE_NAME_MAP[exerciseName]) {
+      skippedSet.add(exerciseName)
+      continue
+    }
+
+    exerciseRowCount++
+    const sessionKey = `${date}__${variation}`
+    if (!sessionMap.has(sessionKey)) sessionMap.set(sessionKey, new Map())
+    const exerciseMap = sessionMap.get(sessionKey)!
+    if (!exerciseMap.has(exerciseName)) exerciseMap.set(exerciseName, [])
+    exerciseMap.get(exerciseName)!.push(row)
+  }
+
+  const workouts: Workout[] = []
+
+  for (const [sessionKey, exerciseMap] of sessionMap) {
+    const [dateStr, variation] = sessionKey.split('__')
+    // Native date is yyyy-mm-dd (ISO)
+    const dateMs = new Date(dateStr).getTime()
+    const workoutId = crypto.randomUUID()
+
+    const exerciseInstances: ExerciseInstance[] = []
+    let orderIndex = 0
+
+    for (const [exerciseName, rows] of exerciseMap) {
+      const exerciseDefinitionId = EXERCISE_NAME_MAP[exerciseName]
+      const sets: Set[] = rows.map(row => {
+        const actualRepsRaw = col(row, 'actual_reps')
+        return {
+          id: crypto.randomUUID(),
+          orderIndex: Number(col(row, 'set_index')) - 1,
+          type: 'work' as const,
+          enabled: true,
+          targetWeight: Number(col(row, 'weight_kg')),
+          targetReps: Number(col(row, 'target_reps')),
+          actualWeight: Number(col(row, 'weight_kg')),
+          actualReps: actualRepsRaw !== '' ? Number(actualRepsRaw) : undefined,
+          status: col(row, 'status') as Set['status'],
+        }
+      })
+      sets.sort((a, b) => a.orderIndex - b.orderIndex)
+
+      const workWeight = sets[0]?.targetWeight ?? 0
+
+      exerciseInstances.push({
+        id: crypto.randomUUID(),
+        exerciseDefinitionId,
+        workoutId,
+        orderIndex,
+        sets,
+        workWeight,
+        barTypeId: 'olympic-20kg',
+        useSharedBarLoading: false,
+      })
+      orderIndex++
+    }
+
+    workouts.push({
+      id: workoutId,
+      dateMs,
+      variation: variation as 'A' | 'B',
+      completed: true,
+      deleted: false,
+      completedAtMs: dateMs,
+      exerciseInstances,
+    })
+  }
+
   workouts.sort((a, b) => a.dateMs - b.dateMs)
 
   return {

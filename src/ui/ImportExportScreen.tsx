@@ -5,7 +5,7 @@ import type { ProgressionStateRepository } from '../data/ProgressionStateReposit
 import type { ProgressionState } from '../domain/models/ProgressionState'
 import type { Workout } from '../domain/models/Workout'
 import {
-  parseStrongLiftsCSV,
+  parseWorkoutHistoryCSV,
   exportWorkoutsToCSV,
   deriveProgressionUpdatesFromWorkouts,
   type ImportPreview,
@@ -47,7 +47,7 @@ export default function ImportExportScreen({
     reader.onload = () => {
       try {
         const text = reader.result as string
-        const result = parseStrongLiftsCSV(text)
+        const result = parseWorkoutHistoryCSV(text)
         setPreview(result.preview)
         setPendingWorkouts(result.workouts)
       } catch (err) {
@@ -172,9 +172,9 @@ export default function ImportExportScreen({
 
         {/* Import section */}
         <section style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <h2 style={{ margin: 0, fontSize: '1rem' }}>Import from StrongLifts</h2>
+          <h2 style={{ margin: 0, fontSize: '1rem' }}>Import History</h2>
           <p style={{ margin: 0, color: '#555', fontSize: '0.9rem' }}>
-            Import workout history from a StrongLifts CSV export.
+            Import workout history from a CSV export (this app or StrongLifts).
           </p>
 
           <input

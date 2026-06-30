@@ -63,6 +63,7 @@ export async function completeActiveWorkout(
       ...progression,
       currentWeight: result.nextWeight,
       failureStreak: result.nextFailureStreak,
+      successStreak: result.nextSuccessStreak,
     })
   }
 

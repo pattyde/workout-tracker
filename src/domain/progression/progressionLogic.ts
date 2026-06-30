@@ -11,6 +11,9 @@ export interface ProgressionResult {
   /** Updated failure streak */
   nextFailureStreak: number
 
+  /** Updated consecutive-success streak toward the next increment */
+  nextSuccessStreak: number
+
   /** Whether the workout was considered a success */
   success: boolean
 
@@ -23,11 +26,11 @@ export interface ProgressionResult {
  */
 export function isWorkoutSuccessful(sets: Set[]): boolean {
     const workSets = sets.filter(set => set.type === 'work')
-  
+
     if (workSets.length === 0) {
       return false
     }
-  
+
     return workSets.every(set => {
       if (set.status !== 'completed') return false
       if (set.actualReps == null) return false
@@ -43,33 +46,41 @@ export function calculateNextProgression(
     barWeight: number
   ): ProgressionResult {
     const success = isWorkoutSuccessful(sets)
-  
+    const successesRequired = progression.successesRequired ?? 1
+
     let nextWeight = progression.currentWeight
     let nextFailureStreak = progression.failureStreak
+    let nextSuccessStreak = progression.successStreak ?? 0
     let deloaded = false
-  
+
     if (success) {
-      nextWeight += progression.plateIncrement
+      nextSuccessStreak += 1
       nextFailureStreak = 0
+
+      if (nextSuccessStreak >= successesRequired) {
+        nextWeight += progression.plateIncrement
+        nextSuccessStreak = 0
+      }
     } else {
+      nextSuccessStreak = 0
       nextFailureStreak += 1
-  
+
       if (nextFailureStreak >= 3) {
         nextWeight = Math.floor(
           (nextWeight * 0.9) / progression.plateIncrement
         ) * progression.plateIncrement
-  
+
         nextWeight = Math.max(nextWeight, barWeight)
         nextFailureStreak = 0
         deloaded = true
       }
     }
-  
+
     return {
       nextWeight,
       nextFailureStreak,
+      nextSuccessStreak,
       success,
       deloaded,
     }
   }
-    

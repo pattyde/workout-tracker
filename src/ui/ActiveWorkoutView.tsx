@@ -80,6 +80,23 @@ export default function ActiveWorkoutView({
   )
 }
 
+type ExerciseCompletion = 'incomplete' | 'success' | 'partial'
+
+function getExerciseCompletion(
+  sets: ExerciseCardProps['sets']
+): ExerciseCompletion {
+  const workSets = sets.filter(s => s.type === 'work' && s.enabled)
+  if (workSets.length === 0) return 'incomplete'
+  if (workSets.some(s => s.status === 'pending')) return 'incomplete'
+  const allHit = workSets.every(
+    s =>
+      s.status === 'completed' &&
+      s.actualReps != null &&
+      s.actualReps >= s.targetReps
+  )
+  return allHit ? 'success' : 'partial'
+}
+
 interface ExerciseCardProps {
   exerciseInstanceId: string
   exerciseDefinitionName: string
@@ -109,6 +126,19 @@ function ExerciseCard({
   const orderedSets = [...sets].sort(
     (a, b) => a.orderIndex - b.orderIndex
   )
+  const completion = getExerciseCompletion(orderedSets)
+  const cardBorder =
+    completion === 'success'
+      ? '1px solid #16A34A'
+      : completion === 'partial'
+        ? '1px solid #DC2626'
+        : '1px solid #d6d6d6'
+  const cardBackground =
+    completion === 'success'
+      ? '#f0fdf4'
+      : completion === 'partial'
+        ? '#fef2f2'
+        : '#f9f9f9'
   const [isEditingWeight, setIsEditingWeight] =
     useState(false)
   const [draftWeight, setDraftWeight] = useState(
@@ -162,10 +192,10 @@ function ExerciseCard({
   return (
     <div
       style={{
-        border: '1px solid #d6d6d6',
+        border: cardBorder,
         borderRadius: '12px',
         padding: '12px',
-        background: '#f9f9f9',
+        background: cardBackground,
       }}
     >
       <div
@@ -177,8 +207,14 @@ function ExerciseCard({
           marginBottom: '8px',
         }}
       >
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <h3 style={{ margin: 0 }}>{exerciseDefinitionName}</h3>
+          {completion === 'success' && (
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#16A34A' }}>✓ Done</span>
+          )}
+          {completion === 'partial' && (
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#DC2626' }}>✗ Done</span>
+          )}
         </div>
         {isEditingWeight ? null : (
           <div style={{ display: 'flex', alignItems: 'center' }}>

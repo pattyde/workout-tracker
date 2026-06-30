@@ -31,6 +31,7 @@ import { getOrInitAppState } from './services/appStateService'
 import { getActiveWorkout } from './services/workoutLifecycleService'
 import HomeScreen from './ui/HomeScreen'
 import { switchActiveWorkoutVariation } from './services/workoutVariationService'
+import ImportExportScreen from './ui/ImportExportScreen'
 import Button from './ui/Button'
 
 function buildDefinitionMap(
@@ -89,7 +90,7 @@ function AppBootstrap() {
   >(null)
   const [completing, setCompleting] = useState(false)
   const [view, setView] = useState<
-    'home' | 'active' | 'history' | 'progression'
+    'home' | 'active' | 'history' | 'progression' | 'importExport'
   >('home')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -232,6 +233,17 @@ function AppBootstrap() {
         }}
         onViewHistory={() => setView('history')}
         onViewSettings={() => setView('progression')}
+        onViewImportExport={() => setView('importExport')}
+      />
+    )
+  }
+
+  if (view === 'importExport') {
+    return (
+      <ImportExportScreen
+        workoutRepository={workoutRepository}
+        exerciseDefinitions={exerciseDefinitions}
+        onBack={() => setView('home')}
       />
     )
   }

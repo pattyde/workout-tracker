@@ -7,6 +7,7 @@ interface HomeScreenProps {
   onStartNew: () => void
   onViewHistory: () => void
   onViewSettings: () => void
+  onViewImportExport: () => void
 }
 
 export default function HomeScreen({
@@ -16,6 +17,7 @@ export default function HomeScreen({
   onStartNew,
   onViewHistory,
   onViewSettings,
+  onViewImportExport,
 }: HomeScreenProps) {
   const resumeSummary =
     resumeExerciseNames && resumeExerciseNames.length > 0
@@ -59,6 +61,13 @@ export default function HomeScreen({
             style={{ width: '100%', minHeight: '48px' }}
           >
             Exercise Settings
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onViewImportExport}
+            style={{ width: '100%', minHeight: '48px' }}
+          >
+            Import / Export
           </Button>
         </div>
       </div>

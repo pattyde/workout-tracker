@@ -29,7 +29,7 @@ import WorkoutHistoryScreen from './ui/WorkoutHistoryScreen'
 import { updateExerciseWorkWeight } from './services/exerciseWorkWeightService'
 import ProgressionIncrementScreen from './ui/ProgressionIncrementScreen'
 import { getOrInitAppState } from './services/appStateService'
-import { getActiveWorkout } from './services/workoutLifecycleService'
+import { getActiveWorkout, abandonActiveWorkout } from './services/workoutLifecycleService'
 import HomeScreen from './ui/HomeScreen'
 import { switchActiveWorkoutVariation } from './services/workoutVariationService'
 import ImportExportScreen from './ui/ImportExportScreen'
@@ -388,6 +388,12 @@ function AppBootstrap() {
           setWorkout(updated)
         }}
         onBack={() => setView('home')}
+        onDelete={async () => {
+          await abandonActiveWorkout(workoutRepository, appStateRepository)
+          setWorkout(null)
+          setActiveStopwatch(null)
+          setView('home')
+        }}
         onSetTap={async setId => {
           if (!workout) return
           const updated = await applySetTapToWorkout(

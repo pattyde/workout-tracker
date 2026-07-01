@@ -15,6 +15,7 @@ interface ActiveWorkoutViewProps {
   equipmentInventory: EquipmentInventory
   onVariationChange: (variation: Workout['variation']) => void
   onBack: () => void
+  onDelete: () => void
   onSetTap: (setId: string) => void
   onWorkWeightSave: (
     exerciseInstanceId: string,
@@ -29,6 +30,7 @@ export default function ActiveWorkoutView({
   equipmentInventory,
   onVariationChange,
   onBack,
+  onDelete,
   onSetTap,
   onWorkWeightSave,
 }: ActiveWorkoutViewProps) {
@@ -52,6 +54,7 @@ export default function ActiveWorkoutView({
         currentVariation={workout.variation}
         onConfirmChange={onVariationChange}
         onBack={onBack}
+        onDelete={onDelete}
       />
       {orderedExercises.map(exercise => (
         <ExerciseCard
@@ -444,12 +447,14 @@ interface VariationHeaderProps {
   currentVariation: Workout['variation']
   onConfirmChange: (variation: Workout['variation']) => void
   onBack: () => void
+  onDelete: () => void
 }
 
 function VariationHeader({
   currentVariation,
   onConfirmChange,
   onBack,
+  onDelete,
 }: VariationHeaderProps) {
   const [isChanging, setIsChanging] = useState(false)
   const [selected, setSelected] =
@@ -674,6 +679,16 @@ function VariationHeader({
                   style={{ width: '100%' }}
                 >
                   Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setIsChanging(false)
+                    onDelete()
+                  }}
+                  style={{ width: '100%' }}
+                >
+                  Delete Workout
                 </Button>
               </div>
             </div>

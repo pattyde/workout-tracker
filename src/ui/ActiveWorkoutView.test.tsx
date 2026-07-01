@@ -86,6 +86,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={() => {}}
       />
     )
@@ -110,6 +111,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={handleSave}
       />
     )
@@ -134,6 +136,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={handleSave}
       />
     )
@@ -158,6 +161,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={handleTap}
+        onDelete={() => {}}
         onWorkWeightSave={() => {}}
       />
     )
@@ -191,6 +195,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={() => {}}
       />
     )
@@ -233,6 +238,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={() => {}}
       />
     )
@@ -262,6 +268,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={() => {}}
         onBack={() => {}}
         onSetTap={handleTap}
+        onDelete={() => {}}
         onWorkWeightSave={handleSave}
       />
     )
@@ -285,6 +292,7 @@ describe('ActiveWorkoutView', () => {
         onVariationChange={handleChange}
         onBack={() => {}}
         onSetTap={() => {}}
+        onDelete={() => {}}
         onWorkWeightSave={() => {}}
       />
     )
